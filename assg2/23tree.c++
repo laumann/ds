@@ -7,14 +7,7 @@
  */
 #include <iostream>
 
-class TwoNode {
-	public:
-		int data;
-		TwoThreeNode *first, *second; // word-size == 64bit
-		TwoThreeNode *parent;
-};
-
-class ThreeNode {
+class TwoThreeNode {
 	public:
 		int firstData, secondData;
 		TwoThreeNode *first, *second, *third;
