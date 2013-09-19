@@ -1,15 +1,12 @@
 /**
  * (Very) Simple 2-3 tree implementation.
- *
- * The key (haha) thing to observe about 2-3 trees is that they are special
- * cases of B-trees (see Cormen et al) when t = 2.
- *
  */
 #include <iostream>
 
 class TwoThreeNode {
 	public:
 		int firstData, secondData;
+		bool leaf;
 		TwoThreeNode *first, *second, *third;
 		TwoThreeNode *parent;
 };
@@ -20,6 +17,7 @@ class TwoThreeTree {
 		~TwoThreeTree(void);
 
 		void insert(int key);
+		void split(TwoThreeNode *n, int x);
 	private:
 		TwoThreeNode *root;
 };
@@ -44,8 +42,74 @@ void TwoThreeTree::insert(int key)
 {
 	std::cout << "Inserting key " << key << std::endl;
 
+	TwoThreeNode *x = this.root;	
+	if (*x == NULL) {
+		this.root = x = new TwoThreeNode;
+		x->firstData = key;
+		return;
+	}
+
 	// Find proper leaf node
+	while (!x.leaf) {
+		if (key < x->firstData) {
+			x = x->first;
+		} else if (x->third == NULL || key < x->secondData) {
+			x = x->second;
+		} else {
+			x = x->third;
+		}
+	}
+
+	if (x->third == NULL) {
+		if (key < x->firstData) {
+			x->secondData = x->firstData;
+			x->firstData = key;
+		} else {
+			x->secondData = key;
+		}
+	}
 	
+	// If space, insert
+	// else split
+	//
+}
+
+
+void TwoThreeTree::split(TwoThreeNode *n, int x) {
+	TwoThreeNode *p;
+	if (this.root == n) {
+		p = new TwoThreeNode;
+	} else {
+		p = n->parent;
+	}
+
+	TwoThreeNode *n1 = new TwoThreeNode, *n2 = new TwoThreeNode;
+	n1->parent = p;
+	n2->parent = p;
+
+	int min, max, mid;
+	min = n->firstData;
+	mid = n->secondData;
+	if (n < min) {
+		max = mid;
+		mid = min;
+		min = n;
+	} else if (n < max) {
+		max = mid;
+		mid = n;
+	} else {
+		max = n;
+	}
+
+	n1.firstData = min;
+	n2.firstData = max;
+
+
+
+	if (!n.leaf) {
+		n.
+	}
+
 }
 
 /**
