@@ -5,21 +5,26 @@
 
 class TwoThreeNode {
 	public:
-		int firstData, secondData;
-		bool leaf;
-		TwoThreeNode *first, *second, *third;
-		TwoThreeNode *parent;
+	TwoThreeNode(void);
+	int firstData, secondData;
+	bool leaf;
+	TwoThreeNode *first, *second, *third;
+	TwoThreeNode *parent;
 };
+
+TwoThreeNode::TwoThreeNode(void) {
+	this->leaf = true;
+}
 
 class TwoThreeTree {
 	public:
-		TwoThreeTree(void);
-		~TwoThreeTree(void);
+	TwoThreeTree(void);
 
-		void insert(int key);
-		void split(TwoThreeNode *n, int x);
+	void insert(int key);
+	void split(TwoThreeNode *n, int x);
+
 	private:
-		TwoThreeNode *root;
+	TwoThreeNode *root;
 };
 
 
@@ -28,9 +33,7 @@ TwoThreeTree::TwoThreeTree()
 	std::cout << "Init 2-3 tree" << std::endl;
 }
 
-TwoThreeTree::~TwoThreeTree()
-{
-}
+#define full(n) n->third
 
 /**
  * Theoretically we should be able to split the nodes on insert as we're
@@ -42,46 +45,47 @@ void TwoThreeTree::insert(int key)
 {
 	std::cout << "Inserting key " << key << std::endl;
 
-	TwoThreeNode *x = this.root;	
-	if (*x == NULL) {
-		this.root = x = new TwoThreeNode;
-		x->firstData = key;
+	TwoThreeNode *n = this->root;
+	if (n == NULL) {
+		this->root = n = new TwoThreeNode;
+		n->firstData = key;
 		return;
 	}
 
 	// Find proper leaf node
-	while (!x.leaf) {
-		if (key < x->firstData) {
-			x = x->first;
-		} else if (x->third == NULL || key < x->secondData) {
-			x = x->second;
+	while (!n->leaf) {
+		if (key < n->firstData) {
+			n = n->first;
+		} else if (!full(n) || key < n->secondData) {
+			n = n->second;
 		} else {
-			x = x->third;
+			n = n->third;
 		}
 	}
 
-	if (x->third == NULL) {
-		if (key < x->firstData) {
-			x->secondData = x->firstData;
-			x->firstData = key;
+	if (full(n))
+		split(n, key);
+	else
+		if (key < n->firstData) {
+			n->secondData = n->firstData;
+			n->firstData = key;
 		} else {
-			x->secondData = key;
+			n->secondData = key;
 		}
-	}
-	
-	// If space, insert
-	// else split
-	//
 }
 
-
+/**
+ *
+ */
 void TwoThreeTree::split(TwoThreeNode *n, int x) {
-	TwoThreeNode *p;
-	if (this.root == n) {
+	TwoThreeNode *p = n == this->root ? new TwoThreeNode : n->parent;
+	/*
+	if (n == this->root) {
 		p = new TwoThreeNode;
 	} else {
 		p = n->parent;
 	}
+	*/
 
 	TwoThreeNode *n1 = new TwoThreeNode, *n2 = new TwoThreeNode;
 	n1->parent = p;
@@ -90,25 +94,45 @@ void TwoThreeTree::split(TwoThreeNode *n, int x) {
 	int min, max, mid;
 	min = n->firstData;
 	mid = n->secondData;
-	if (n < min) {
+	if (x < min) {
 		max = mid;
 		mid = min;
-		min = n;
-	} else if (n < max) {
+		min = x;
+	} else if (x < min) {
 		max = mid;
-		mid = n;
+		mid = x;
 	} else {
-		max = n;
+		max = x; 
 	}
 
-	n1.firstData = min;
-	n2.firstData = max;
+	n1->firstData = min;
+	n2->firstData = max;
+
+	// Do we need to split the parent?
+	if (full(p)) {
+		// Split parent
+		// We have an extra pointer to handle
+	} else {
+		// Parent has two children (and one key)
+		// We push up mid, and find out which child we were originally
+		if (n == p->first) {
+			// arrange data
+			p->secondData = p->firstData;
+			p->firstData = mid;
+			// arrange pointers
+			p->third = p->second;
+			p->second = n2;
+			p->first = n1;
+			delete n;
+		}
+	}
 
 
-
+	/*
 	if (!n.leaf) {
 		n.
 	}
+	*/
 
 }
 
