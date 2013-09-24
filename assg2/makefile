@@ -15,8 +15,8 @@ $(insert): %.insert : %.i++
 	done; \
 	rm -f ./a.out 
 
-23tree:
-	$(CXX) $(CXXFLAGS) 23tree.c++
+23tree: 23tree.c++
+	$(CXX) $(CXXFLAGS) $< -o $@
 
 debug:
 	@echo $(set-implementations)
