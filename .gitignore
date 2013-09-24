@@ -12,3 +12,7 @@
 *.la
 *.a
 a.out
+*.ps
+*.dot
+assg2/23tree
+*.swp
