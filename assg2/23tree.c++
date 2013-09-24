@@ -9,14 +9,16 @@
 class TwoThreeNode {
 	public:
 	TwoThreeNode(void);
-	~TwoThreeNode(void);
 	int firstData, secondData;
 	bool leaf;
 	bool full;
-	TwoThreeNode *first, *second, *third, *fourth;
+	TwoThreeNode *first, *second, *third;
 	TwoThreeNode *parent;
 };
 
+/**
+ * Useful for debugging
+ */
 void dump_node(TwoThreeNode *n) {
 	std::cout << n << " *TwoThreeNode{ first: " << n->first
 		<< ", second: " << n->second
@@ -38,10 +40,6 @@ TwoThreeNode::TwoThreeNode(void) {
 	this->firstData = this->secondData = 0;
 }
 
-TwoThreeNode::~TwoThreeNode(void) {
-	std::cout << "Deleting node: "; dump_node(this);
-}
-
 /**
  * 2-3 tree
  */
@@ -50,7 +48,7 @@ class TwoThreeTree {
 	TwoThreeTree(void);
 
 	void insert(int key);
-	void split(TwoThreeNode *n, int x);
+	//void split(TwoThreeNode *n, int x);
 	void split(TwoThreeNode *n, int key, TwoThreeNode *first, TwoThreeNode *second, TwoThreeNode *third, TwoThreeNode *fourth);
 	int size;
 	TwoThreeNode *root;
@@ -60,8 +58,6 @@ TwoThreeTree::TwoThreeTree() {
 	std::cout << "Init 2-3 tree" << std::endl;
 	this->size = 0;
 }
-
-void printNode(TwoThreeNode *n);
 
 
 /**
@@ -181,294 +177,75 @@ void TwoThreeTree::insert(int key) {
  */
 void TwoThreeTree::split(TwoThreeNode *n, int key, TwoThreeNode *first, TwoThreeNode *second, TwoThreeNode *third, TwoThreeNode *fourth) {
 	
-	if (n == this->root) {
-		std::cout << "Splitting root!" << std::endl;
-		
-		TwoThreeNode *r = new TwoThreeNode;
-		TwoThreeNode *n1 = new TwoThreeNode, *n2 = new TwoThreeNode;
-		
-		int min = n->firstData, mid = n->secondData, max;
-		if (key < min) {
-			max = mid;
-			mid = min;
-			min = key;
-		} else if (key < mid) {
-			max = mid;
-			mid = key;
-		} else {
-			max = key;
-		}
-		std::cout << "min: " << min << ", mid: " << mid << ", max: " << max << std::endl;
-		n1->firstData = min;
-		n2->firstData = max;
-		n1->parent = r;
-		n2->parent = r;
-		
-		r->firstData = mid;
-		r->first = n1;
-		r->second = n2;
-		r->leaf = false;
+	TwoThreeNode *n1 = new TwoThreeNode, *n2 = new TwoThreeNode;
+	TwoThreeNode *p = n == this->root ? new TwoThreeNode : n->parent;
 
-		if (!n->leaf) {
-			n1->first = first;
-			first->parent = n1;
-			n1->second = second;
-			second->parent = n1;
-			n2->first = third;
-			third->parent = n2;
-			n2->second = fourth;
-			fourth->parent = n2;
-			n1->leaf = n2->leaf = false;
-		}
-		this->root = r;
-		dump_node(n1);
-		dump_node(n2);
-		dump_node(r);
+	// Get the keys in order
+	int min = n->firstData, mid = n->secondData, max;
+	if (key < min) {
+		max = mid;
+		mid = min;
+		min = key;
+	} else if (key < mid) {
+		max = mid;
+		mid = key;
 	} else {
-		/**
-		 * We're in the tree somewhere - could be a leaf or an internal,
-		 * but we're not the root.
-		 */
-		dump_node(n->parent);
-		TwoThreeNode *p = n->parent;
-		TwoThreeNode *n1 = new TwoThreeNode;
-		TwoThreeNode *n2 = new TwoThreeNode;
-		std::cout << "n:      "; dump_node(n);
-		std::cout << "parent: "; dump_node(p);
-		
-		int min = n->firstData, mid = n->secondData, max;
-		if (key < min) {
-			max = mid;
-			mid = min;
-			min = key;
-		} else if (key < mid) {
-			max = mid;
-			mid = key;
-		} else {
-			max = key;
-		}
-		
-		n1->firstData = min;
-		n2->firstData = max;
-		n1->parent = p;
-		n2->parent = p;
-
-		if (!n->leaf) {
-			std::cout << "pointer adjustment" << std::endl;
-			std::cout << "first:  "; dump_node(first); 
-			std::cout << "second: "; dump_node(second); 
-			std::cout << "third:  "; dump_node(third); 
-			std::cout << "fourth: "; dump_node(fourth); 
-
-			n1->first = first;
-			first->parent = n1;
-			n1->second = second;
-			second->parent = n1;
-			n2->first = third;
-			third->parent = n2;
-			n2->second = fourth;
-			fourth->parent = n2;
-			n1->leaf = n2->leaf = false;
-		}
-		std::cout << "n1:     "; dump_node(n1);
-		std::cout << "n2:     "; dump_node(n2);
-		if (n2 == n2->parent)
-			std::cout << "That's a whoopsie!" << std::endl;
-
-
-		std::cout << "Pushing up " << mid << std::endl;
-		if (p->full) {
-			if (n == p->first) {
-				split(p, mid, n1, n2, p->second, p->third);
-			} else if (n == p->second) {
-				split(p, mid, p->first, n1, n2, p->third);
-			} else {
-				split(p, mid, p->first, p->second, n1, n2);
-			}
-		} else {
-			std::cout << "There's room... ";
-			/**
-			 * Add it in
-			 */
-			if (mid < p->firstData) {
-				std::cout << "Added as first" << std::endl;
-				p->secondData = p->firstData;
-				p->firstData = mid;
-
-				p->third = p->second;
-				p->second = n2;
-				p->first = n1;
-			} else {
-				std::cout << "Added as second" << std::endl;
-				p->secondData = mid;
-
-				p->second = n1;
-				p->third = n2;
-			}
-			p->full = true;
-			printNode(p);
-		}
+		max = key;
 	}
-	delete n;
-}
 
-/**
-Considering the various cases
+	n1->firstData = min;
+	n2->firstData = max;
+	n1->parent = p;
+	n2->parent = p;
 
-    [ 2 . 6 ]
-   /    |    \
- [1]  [3.4]  [7]
+	if (!n->leaf) {
+		n1->first = first;
+		n1->second = second;
+		n2->first = third;
+		n2->second = fourth;
 
-Insert 5
+		first->parent = n1;
+		second->parent = n1;
+		third->parent = n2;
+		fourth->parent = n2;
 
-Case splitting leaf node
- */
-void TwoThreeTree::split(TwoThreeNode *n, int x) {
+		n1->leaf = n2->leaf = false;
+	}
 
-	TwoThreeNode *p;
-	TwoThreeNode *n1 = new TwoThreeNode;
-	TwoThreeNode *n2 = new TwoThreeNode;
 	if (n == this->root) {
-		// When splitting the root we short-circuit the entire deal
-		std::cout << "Splitting root!" << std::endl;
-		p = new TwoThreeNode;
-		this->root = p;
-		n1->parent = p;
-		n2->parent = p;
-
-		int min, max, mid;
-		min = n->firstData;
-		mid = n->secondData;
-		if (x < min) {
-			max = mid;
-			mid = min;
-			min = x;
-		} else if (x < mid) {
-			max = mid;
-			mid = x;
-		} else {
-			max = x;
-		}
-		n1->firstData = min;
-		n1->first = n->first;
-		n1->second = n->second;
-		n1->leaf = n->leaf;
-
 		p->firstData = mid;
 		p->first = n1;
 		p->second = n2;
 		p->leaf = false;
-
-		n2->firstData = max;
-		n2->first = n->third;
-		n2->second = n->fourth;
-		n2->leaf = n->leaf;
-		
-		delete n;
-
+		this->root = p;
+	} else if (p->full) {
+		if (n == p->first) {
+			split(p, mid, n1, n2, p->second, p->third);
+		} else if (n == p->second) {
+			split(p, mid, p->first, n1, n2, p->third);
+		} else {
+			split(p, mid, p->first, p->second, n1, n2);
+		}
 	} else {
-		// We split node n (who is not the root)
-		dump_node(n);
-		p = n->parent;
+		/**
+		 * Simply add it in
+		 */
+		if (mid < p->firstData) {
+			p->secondData = p->firstData;
+			p->firstData = mid;
 
-		n1->parent = p;
-		n2->parent = p;
-		
-		// sort the data (find out if x is min, mid or max)
-		int min = n->firstData, mid = n->secondData, max;
-		if (x < min) {
-			max = mid;
-			mid = min;
-			min = x;
-		} else if (x < mid) {
-			max = mid;
-			mid = x;
+			p->third = p->second;
+			p->second = n2;
+			p->first = n1;
 		} else {
-			max = x;
-		}
-		n1->firstData = min; // n1 receives smallest
-		n2->firstData = max; // n2 receives largest
+			p->secondData = mid;
 
-		if (!n->leaf) {
-			/**
-			 * If n is not a leaf it must have four children (by
-			 * construction), 
-			 */
-			n1->first  = n->first;
-			n1->second = n->second;
-			n2->first  = n->third;
-			n2->second = n->fourth;
-			n1->leaf = n2->leaf = false;
+			p->second = n1;
+			p->third = n2;
 		}
-		std::cout << "Pushing up " << mid << " (parent " << (p->full ? "is full)" : "has room)") << std::endl;
-
-		if (p->full) {
-			// Give it four children
-			if (n == p->first) {
-				std::cout << "We're p->first" << std::endl;
-				p->fourth = p->third;
-				p->third = p->second;
-				p->second = n2;
-				p->first = n1;
-			} else if (n == p->second) {
-				std::cout << "We're p->second" << std::endl;
-				p->fourth = p->third;
-				p->third = n2;
-				p->second = n1;
-			} else if (n == p->third) {
-				std::cout << "We're p->third" << std::endl;
-				p->third = n1;
-				p->fourth = n2;
-			} else if (n == p->fourth) {	
-				std::cout << "We're p->fourth. That's an error" << std::endl;
-			}
-			split(p, mid);
-		} else {
-			/**
-			 * Add it in.
-			 */
-			dump_node(p);
-			if (n == p->first) {
-				std::cout << "We're p->first" << std::endl;
-			} else if (n == p->second) {
-				std::cout << "We're p->second" << std::endl;
-			} else if (n == p->third) {
-				std::cout << "We're p->third" << std::endl;
-			} else if (n == p->fourth) {
-				std::cout << "We're p->fourth" << std::endl;
-			}
-			if (n == p->first) {
-				p->third = p->second;
-				p->second = n2;
-				p->first = n1;
-				p->secondData = p->firstData;
-				p->firstData = mid;
-			} else {
-				p->second = n1;
-				p->third = n2;
-				p->secondData = mid;
-			}
-			p->full = true;
-		}
-		delete n;
+		p->full = true;
 	}
-}
-
-void printNode(TwoThreeNode *n) {
-	std::cout << "### Node " << n << std::endl;
-	std::cout << "    root? " << ((n->parent == NULL) ? "yes" : "no") << std::endl;
-	if (n->parent)
-		std::cout << "    parent: " << n->parent << std::endl;
-	std::cout << "    key1  " << n->firstData << std::endl;
-	//if (n->third == NULL)
-	if (n->full)
-		std::cout << "    key2  " << n->secondData << std::endl;
-
-	if (n->leaf)
-		std::cout << "    " << "Is leaf (no children)" << std::endl;
-	else
-		std::cout << "    Has " << (n->third == NULL ? "2" : "3") << " children." << std::endl;
-
+	delete n;
 }
 
 #define ARRAYSIZE(x) sizeof(x)/sizeof(x[0])
