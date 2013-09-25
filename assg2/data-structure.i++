@@ -1,8 +1,0 @@
-#include <functional>
-#include <memory>
-#include <set>
-
-using K = int;
-using C = std::less<K>;
-using A = std::allocator<K>;
-using S = std::set<K, C, A>;

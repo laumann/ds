@@ -132,7 +132,6 @@ void dotty(TwoThreeTree *t) {
  * we don't (yet) risk dead-locking).
  */
 void TwoThreeTree::insert(int key) {
-	std::cout << "Inserting key " << key << std::endl;
 
 	if (this->size == 0) {
 		this->root = new TwoThreeNode;
@@ -157,7 +156,6 @@ void TwoThreeTree::insert(int key) {
 	if (n->full)
 		split(n, key, NULL, NULL, NULL, NULL);
 	else {
-		std::cout << "Inserting " << key << " in " << n << std::endl;
 		if (key < n->firstData) {
 			n->secondData = n->firstData;
 			n->firstData = key;
