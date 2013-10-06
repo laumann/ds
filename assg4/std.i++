@@ -1,0 +1,7 @@
+#ifndef NAME
+#define NAME std
+#endif
+
+#include <algorithm> // std::sort
+
+using K = int;
