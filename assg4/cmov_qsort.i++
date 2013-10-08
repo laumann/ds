@@ -17,7 +17,7 @@ namespace NAME {
 	RandomAccessIterator partition(RandomAccessIterator p, RandomAccessIterator r, Compare comp) {
 		RandomAccessIterator i = p-1;
 		for (RandomAccessIterator j = p; j != r-1; j++)
-			if (comp(*j,*r))
+			if (!comp(*r,*j))
 				std::iter_swap(++i, j);
 
 		std::iter_swap(++i, r);
