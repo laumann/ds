@@ -1,35 +1,59 @@
 /**
  * The intention of this file is to run a modified version of quicksort in
- * which we always ensure that the inner conditional statement becomes as CMOV instruction (or series of), rather than branching instructions
+ * which we always ensure that the inner conditional statement becomes as CMOV
+ * instruction (or series of), rather than branching instructions
  */
 #ifndef NAME
 #define NAME cmov_qsort
 #endif
 
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-
 using K = int;
 
 namespace NAME {
-	template <class RandomAccessIterator, class Compare>
-	RandomAccessIterator partition(RandomAccessIterator p, RandomAccessIterator r, Compare comp) {
-		RandomAccessIterator i = p-1;
-		for (RandomAccessIterator j = p; j != r-1; j++)
-			if (!comp(*r,*j))
+	/**
+	 * The partition routine. For now a direct copy of the CRLS routine. Optimizations
+	 * could include:
+	 *
+	 *  - median-of-three pivot
+	 *  - custom swapping routine (using C++ 'auto' keyword?)
+	 *  - insertion sort on small lists
+	 *  - move in two pointers from left and right
+	 *
+	 */
+	template <typename RandomAccessIterator, typename Comparator>
+	RandomAccessIterator partition(RandomAccessIterator p, RandomAccessIterator r, Comparator comp) {
+		RandomAccessIterator i = p - 1;
+
+		for (RandomAccessIterator j = p; j != r; j++)
+			if (comp(*j, *r))
 				std::iter_swap(++i, j);
 
 		std::iter_swap(++i, r);
 		return i;
 	}
-	template <class RandomAccessIterator, class Compare>
-	void sort(RandomAccessIterator p, RandomAccessIterator r, Compare comp) {
+
+	/**
+	 * The actual sorting routine. The 'r' argument is expected to point to the
+	 * _last_ element of the input, not the position immediately after.
+	 */
+	template <typename RandomAccessIterator, typename Comparator>
+	void sort_inner(RandomAccessIterator p, RandomAccessIterator r, Comparator comp) {
 		if (p < r) {
 			RandomAccessIterator q = NAME::partition(p, r, comp);
-			NAME::sort(p, q-1, comp);
-			NAME::sort(q+1, r, comp);
+			NAME::sort_inner(p, q-1, comp);
+			NAME::sort_inner(q+1, r, comp);
 		}
 	}
 
+	/**
+	 * For some reason 'end' includes the last NULL byte, and this creates chaos
+	 * (the first run would then mistakingly use 0 as the pivot).
+	 *
+	 * Wrapping the actual sorting routine and simply passing 'end - 1' does the
+	 * trick.
+	 */
+	template <typename RandomAccessIterator, typename Comparator>
+	void sort(RandomAccessIterator begin, RandomAccessIterator end, Comparator comp) {
+		NAME::sort_inner(begin, end - 1, comp);
+	}
 }

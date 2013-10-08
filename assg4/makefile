@@ -1,5 +1,5 @@
 CXX=g++-4.7
-CXXFLAGS=-O3 -Wall -DNDEBUG -std=c++11
+CXXFLAGS=-O3 -Wall -std=c++11
 
 sorting-algorithms:= $(wildcard *.i++)
 sorting-bases:= $(basename $(sorting-algorithms))
@@ -14,8 +14,10 @@ $(comp): %.compile: %.i++
 	@rm algorithm.i++
 
 $(sort): %.sort : %.compile
-	for n in $(N) ; do \
+	@rm -f $*.log
+	@for n in $(N) ; do \
 	  ./a.out $$n >> $*.log ; \
+	  echo -n '.' ; \
 	done
 	@#@rm -f ./a.out 
 

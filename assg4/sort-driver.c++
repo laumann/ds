@@ -24,7 +24,7 @@ void usage(int argc, char **argv) {
 
 int main(int argc, char** argv) {
   using V = std::vector<K>;
-  using C = std::less_equal<K>;
+  using C = std::less<K>;
 
   int n;
   if (argc == 1) {
@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
   else { 
     usage(argc, argv);
   }
+
   int repetitions = 32 * 1024 * 1024 / n;
   if (repetitions < 3) {
     repetitions = 3;
@@ -54,12 +55,6 @@ int main(int argc, char** argv) {
   std::clock_t stop = std::clock();
 
   for (int k = 0; k != repetitions; ++k) {
-    std::cout << "[";
-    V::iterator iter = many[k].begin();
-    for ( ; iter != many[k].end(); ++iter) {
-    	std::cout << *iter << ", ";
-    }
-    std::cout << "]" << std::endl;
     assert(std::is_sorted(many[k].begin(), many[k].end(), C()));
     many[k].clear();
   }
