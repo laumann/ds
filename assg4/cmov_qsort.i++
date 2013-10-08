@@ -1,0 +1,35 @@
+/**
+ * The intention of this file is to run a modified version of quicksort in
+ * which we always ensure that the inner conditional statement becomes as CMOV instruction (or series of), rather than branching instructions
+ */
+#ifndef NAME
+#define NAME cmov_qsort
+#endif
+
+#include <algorithm>
+#include <iterator>
+#include <iostream>
+
+using K = int;
+
+namespace NAME {
+	template <class RandomAccessIterator, class Compare>
+	RandomAccessIterator partition(RandomAccessIterator p, RandomAccessIterator r, Compare comp) {
+		RandomAccessIterator i = p-1;
+		for (RandomAccessIterator j = p; j != r-1; j++)
+			if (comp(*j,*r))
+				std::iter_swap(++i, j);
+
+		std::iter_swap(++i, r);
+		return i;
+	}
+	template <class RandomAccessIterator, class Compare>
+	void sort(RandomAccessIterator p, RandomAccessIterator r, Compare comp) {
+		if (p < r) {
+			RandomAccessIterator q = NAME::partition(p, r, comp);
+			NAME::sort(p, q-1, comp);
+			NAME::sort(q+1, r, comp);
+		}
+	}
+
+}

@@ -7,14 +7,18 @@ sort:= $(addsuffix .sort, $(sorting-bases))
 
 N = 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576 2097152 4194304 8388608 16777216 33554432
 
+cmov_qsort: cmov_qsort.i++
+	@cp cmov_qsort.i++ algorithm.i++
+	$(CXX) $(CXXFLAGS) sort-driver.c++
+
 $(sort): %.sort : %.i++
 	@cp $*.i++ algorithm.i++
 	@rm -f $*.log
 	$(CXX) $(CXXFLAGS) sort-driver.c++
-	@for n in $(N) ; do \
+	for n in $(N) ; do \
 	  ./a.out $$n >> $*.log ; \
 	done
-	@rm -f ./a.out 
+	@#@rm -f ./a.out 
 
 plot:
 	@gnuplot < time.gp

@@ -1,5 +1,6 @@
 #include <algorithm>  // std::random_shuffle
 #include "algorithm.i++" // K defined here
+#undef NDEBUG
 #include <cassert>
 #include <ctime>
 #include <functional> // std::less
@@ -23,7 +24,7 @@ void usage(int argc, char **argv) {
 
 int main(int argc, char** argv) {
   using V = std::vector<K>;
-  using C = std::less<K>;
+  using C = std::less_equal<K>;
 
   int n;
   if (argc == 1) {
@@ -53,6 +54,12 @@ int main(int argc, char** argv) {
   std::clock_t stop = std::clock();
 
   for (int k = 0; k != repetitions; ++k) {
+    std::cout << "[";
+    V::iterator iter = many[k].begin();
+    for ( ; iter != many[k].end(); ++iter) {
+    	std::cout << *iter << ", ";
+    }
+    std::cout << "]" << std::endl;
     assert(std::is_sorted(many[k].begin(), many[k].end(), C()));
     many[k].clear();
   }
