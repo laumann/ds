@@ -4,7 +4,7 @@
  * instruction (or series of), rather than branching instructions
  */
 #ifndef NAME
-#define NAME cmov_qsort
+#define NAME std_qsort
 #endif
 
 using K = int;
@@ -23,11 +23,9 @@ namespace NAME {
 	RandomAccessIterator partition(RandomAccessIterator p, RandomAccessIterator r, Comparator comp) {
 		RandomAccessIterator i = p - 1;
 
-		for (RandomAccessIterator j = p; j != r; j++) {
-			int b = comp(*j, *r);
-			auto k = b ? ++i : j;
-			std::iter_swap(k, j);
-		}
+		for (RandomAccessIterator j = p; j != r; j++)
+			if (comp(*j, *r))
+				std::iter_swap(++i, j);
 
 		std::iter_swap(++i, r);
 		return i;

@@ -1,5 +1,5 @@
 CXX=g++-4.7
-CXXFLAGS=-O3 -Wall -std=c++11
+CXXFLAGS= -Wall -DNDEBUG -O3 -std=c++11
 
 sorting-algorithms:= $(wildcard *.i++)
 sorting-bases:= $(basename $(sorting-algorithms))
@@ -10,16 +10,25 @@ N = 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576 2097152 4
 
 $(comp): %.compile: %.i++
 	@cp $*.i++ algorithm.i++
-	$(CXX) $(CXXFLAGS) sort-driver.c++
+	$(CXX) $(CXXFLAGS) sort-driver.c++ -o $*
 	@rm algorithm.i++
 
 $(sort): %.sort : %.compile
 	@rm -f $*.log
-	@for n in $(N) ; do \
-	  ./a.out $$n >> $*.log ; \
+	for n in $(N) ; do \
+	  ./$* $$n >> $*.log ; \
 	  echo -n '.' ; \
 	done
+	@echo
 	@#@rm -f ./a.out 
+
+compare-dump:
+	@cp cmov_qsort.i++ algorithm.i++
+	$(CXX) $(CXXFLAGS) sort-driver.c++ -o qsort.o -c
+	$(CXX) $(CXXFLAGS) sort-driver.c++ -o cmov_qsort.o -c
+	@objdump -d qsort.o > qsort.dump
+	@objdump -d cmov_qsort.o > cmov_qsort.dump
+	@diff -Naur qsort.dump cmov_qsort.dump |colordiff |less -r
 
 plot:
 	@gnuplot < time.gp
