@@ -38,4 +38,4 @@ clean:
 	- rm  -f core a.out algorithm.i++ time.eps *.o 2>/dev/null
 
 veryclean: clean
-	- rm -f *~ *.log time.pdf 2>/dev/null
+	- rm -f *~ *.log time.pdf 2>/dev/null $(sorting-bases)
