@@ -1,0 +1,63 @@
+\documentclass[]{article}
+
+\usepackage{tikz}
+\usepackage{float}
+\usetikzlibrary{arrows,shapes.geometric}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{note}[theorem]{Note}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\Oo}{\mathcal O} %big-O notation
+\newcommand{\oo}{\mathcal o} %small-O notation ;)
+
+\title{Chain hashing for variable length strings}
+\author{Thomas Laumann Jespersen \and Eva Rotenberg}
+
+\begin{document}
+\maketitle
+
+\section{Theory}
+
+Given a string $x=x_0 \ldots x_d$ with $x_i < u$, and a codomain $[m]$, let $p$ be a small Mersenne prime larger than $u$ and $m$. We use the following hash function, given random seeds $a,b < p$:
+\[h(x)= \left( b \left( \sum_{i=0}^{d}x_i a^i \right) \mod p \right) \mod m \]
+
+Given that $d$ is no larger than $p/m$, the collision probability is at most $2/m$. Setting $p=2^{89}-1$ and $u=2^{64}$ and $m=2^{32}$, this means we are safe for strings of length up $2^{57}$, which is enough for our purposes.
+
+Our algorithm thus states roughly:
+
+\begin{verbatim}
+a <- random number
+b <- random number
+ai = 1
+res = x[0]
+for(i = 1 to d){
+  ai = ai * a (mod p)
+  res = res + ai * x[i] (mod p)
+}
+res = res * b (mod p)
+res = res mod p
+\end{verbatim}
+
+As earlier noted, we can use the congruence $x \equiv x\mod 2^q + \lfloor x / 2^q \rfloor$, to make quicker calculations modulo a Mersenne prime, $2^q -1$.
+
+In order to multiply $>32$ bit numbers, in fact several multiplications are needed. When multiplying two circa $89$ bit numbers, we split each number into two parts: $a = a_2\cdot 2^{64} + a_1 \cdot 2^{32} + a_0$, and similarly, $y = y_2\cdot y^{64} + y_1 \cdot 2^{32} + y_0$, where $a_i$ and $y_j$ are all $32$-bit numbers. Then, we calculate all the multiplications $a_i y_j$. To find the mod p value of $ay$, we analyse each summand, which is on the form $a_i y_j \cdot 2^{k}$, where $a_i y_j$ is a $64$ bit number. Using the congruence above, when $k>q$, we do not need to add the first summand $a_i y_j \cdot 2^k \mod 2^q = 0$, and need only add $a_i y_j \cdot 2^{k-q}$. Symmetrically, $a_0 y_0$ only contributes with the first summand, as $a_0 y_0 < 2^q$.
+
+\section{Experiment}
+We compare our function with the c++ standard library. As objects we have downloaded books in different languages from The Gutenberg Project. 
+
+\end{document}
