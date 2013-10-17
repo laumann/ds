@@ -118,6 +118,9 @@ void add_to(struct number *a, struct number *b) {
 	a->high = (a->high + b->high) + overflow;
 }
 
+/**
+ * 
+ */
 struct number *multp(struct number *a, struct number *b) {
 	
 	uint64_t mults[9];
@@ -139,7 +142,7 @@ struct number *multp(struct number *a, struct number *b) {
 	mults[0] = m64(a->high, b->high);	// 2^128
 
 	struct number numbers[15];
-	for (int i=0; i<15; i++) // Zero
+	for (int i = 0; i < 15; i++) // Zero
 		numbers[i].low = numbers[i].mid = numbers[i].high = 0;
 
 	numbers[0].low = low(mults[8]);
@@ -150,11 +153,11 @@ struct number *multp(struct number *a, struct number *b) {
 
 	n64 = mults[7] & (((uint64_t)1 << 47) - 1);
 	numbers[3].mid = low(n64);
-	numbers[3].mid = high(n64);
+	numbers[3].high = high(n64);
 
 	n64 = mults[6] & (((uint64_t)1 << 47) - 1);
 	numbers[4].mid = low(n64);
-	numbers[4].mid = high(n64);
+	numbers[4].high = high(n64);
 
 	n64 = mults[5] >> 25;
 	numbers[5].low = low(n64);
@@ -200,8 +203,7 @@ struct number *multp(struct number *a, struct number *b) {
 	 */
 	std::cout << "Adding numbers" << std::endl;
 	for (int i = 0; i < 15; i++) {
-		print_number(&numbers[i]);
-		std::cout << std::endl;
+		print_number(&numbers[i]); std::cout << std::endl;
 		add_to(r, &numbers[i]);
 	}
 	std::cout << "End of Adding numbers" << std::endl;
@@ -394,6 +396,38 @@ void test_new1() {
 
 }
 
+void test_new_first_overflow() {
+	struct number n1 = {0, 0, ((uint32_t)1 << 20)};
+	struct number n2 = {0, 0, ((uint32_t)1 << 32) - 1};
+
+	print_number(&n1);
+	std::cout << std::endl;
+	print_number(&n2);
+	std::cout << std::endl;
+	
+	struct number *result = multp(&n1, &n2);
+	
+	print_number(result);
+	std::cout << std::endl;
+
+}
+
+void test_new_overflow() {
+	struct number n1 = {0, ((uint32_t)1 << 8), 0};
+	struct number n2 = {0, 0, ((uint32_t)1 << 32) - 1};
+
+	print_number(&n1);
+	std::cout << std::endl;
+	print_number(&n2);
+	std::cout << std::endl;
+	
+	struct number *result = multp(&n1, &n2);
+	
+	print_number(result);
+	std::cout << std::endl;
+
+}
+
 int main(int argc, char* argv[]) {
 	// Make hash table
 	std::unordered_map<std::string, int> mapa;
@@ -404,10 +438,18 @@ int main(int argc, char* argv[]) {
 	test_add();
 	test_add_larger();
 	std::cout << std::endl;
-
+	/*
 	test_new00();
+	std::cout << std::endl;
 	test_new11();
+	std::cout << std::endl;
 	test_new1();
+	std::cout << std::endl;
+	test_new_first_overflow();
+	std::cout << std::endl;
+	*/
+	test_new_overflow();
+	std::cout << std::endl;
 
 	struct number x = { 0, 0, (uint32_t)1 << 22}; // should end up in 23+29 = 42
 	struct number y = { 0, 0, (uint32_t)1 << 29};
