@@ -201,12 +201,12 @@ struct number *multp(struct number *a, struct number *b) {
 	/**
 	 * Add them up
 	 */
-	std::cout << "Adding numbers" << std::endl;
+	//std::cout << "Adding numbers" << std::endl;
 	for (int i = 0; i < 15; i++) {
-		print_number(&numbers[i]); std::cout << std::endl;
+		//print_number(&numbers[i]); std::cout << std::endl;
 		add_to(r, &numbers[i]);
 	}
-	std::cout << "End of Adding numbers" << std::endl;
+	//std::cout << "End of Adding numbers" << std::endl;
 
 	/**
 	 * One more modulo
