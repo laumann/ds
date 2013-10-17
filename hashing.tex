@@ -66,6 +66,13 @@ In order to multiply $>32$ bit numbers, in fact several multiplications are need
 
 Using the calculation above, we can obtain a sum of $89$-bit numbers. If we also perform modulo on the high-part of the sum, we obtain a $\le 90$-bit number, which leaves us satisfied.
 
+\section{Unit testing}
+
+\paragraph{Multiply mod $p = 2^{81} -1$.} To test correctness of out mod-$p$-multiplier, we multiply two random numbers $a,b$ using a black-box multiplication function we assume to work obtaining the product $a*b$. Then we calculate our mod-$p$ product, $a\cdot b$. If the difference is divisible by $p$, we are happy. We calculate: 
+$$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
+
+We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
+
 \section{Experiment}
 We compare our function with the c++ standard library. As objects we have downloaded books in different languages from The Gutenberg Project. 
 
