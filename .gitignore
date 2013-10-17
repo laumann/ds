@@ -16,3 +16,8 @@ a.out
 *.dot
 assg2/23tree
 *.swp
+*.dvi
+*.pdf
+*.log
+*.aux
+*.zip
