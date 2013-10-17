@@ -119,9 +119,20 @@ void add_to(struct number *a, struct number *b) {
 }
 
 /**
+ * Do mod p on number
+ */
+void modp(struct number *a) {
+	uint32_t rh = a->high;
+	a->high = rh & (((uint32_t)1 << 25) - 1);
+
+	struct number x = {0, 0, rh >> 25};
+	add_to(a, &x);
+}
+
+/**
  * 
  */
-struct number *multp(struct number *a, struct number *b) {
+struct number *multp(struct number *a, struct number *b, struct number *output) {
 	
 	uint64_t mults[9];
 	uint64_t n64; // tmp storage for 64-bit numbers
@@ -195,8 +206,8 @@ struct number *multp(struct number *a, struct number *b) {
 	numbers[14].low = low(mults[0] >> 50);
 
 
-	struct number *r = (struct number*)malloc(sizeof(struct number));
-	r->low = r->mid = r->high = 0;
+	//struct number *r = (struct number*)malloc(sizeof(struct number));
+	output->low = output->mid = output->high = 0;
 
 	/**
 	 * Add them up
@@ -204,20 +215,21 @@ struct number *multp(struct number *a, struct number *b) {
 	//std::cout << "Adding numbers" << std::endl;
 	for (int i = 0; i < 15; i++) {
 		//print_number(&numbers[i]); std::cout << std::endl;
-		add_to(r, &numbers[i]);
+		add_to(output, &numbers[i]);
 	}
 	//std::cout << "End of Adding numbers" << std::endl;
 
 	/**
 	 * One more modulo
 	 */
-	uint32_t rh = r->high;
-	r->high = rh & (((uint32_t)1 << 25) - 1);
+	modp(output);
+	/*
+	uint32_t rh = output->high;
+	output->high = rh & (((uint32_t)1 << 25) - 1);
 
 	struct number x = {0, 0, rh >> 25};
-	add_to(r, &x);
-
-	return r;
+	add_to(output, &x);
+	*/
 }
 
 /**
@@ -357,7 +369,8 @@ void test_new00() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	
 	print_number(result);
 	std::cout << std::endl;
@@ -373,7 +386,8 @@ void test_new11() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	
 	print_number(result);
 	std::cout << std::endl;
@@ -389,7 +403,8 @@ void test_new1() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	
 	print_number(result);
 	std::cout << std::endl;
@@ -405,7 +420,8 @@ void test_new_first_overflow() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	
 	print_number(result);
 	std::cout << std::endl;
@@ -421,7 +437,8 @@ void test_new_overflow() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	
 	print_number(result);
 	std::cout << std::endl;
@@ -436,7 +453,8 @@ void test_first_modulo() {
 	print_number(&n2);
 	std::cout << std::endl;
 	
-	struct number *result = multp(&n1, &n2);
+	struct number *result = (struct number*)malloc(sizeof(struct number));
+	multp(&n1, &n2, result);
 	print_number(result);
 	std::cout << std::endl;
 	/*
@@ -454,6 +472,31 @@ void test_first_modulo() {
 	*/
 }
 
+#define array_size(x) (sizeof(x)/sizeof(x[0]))
+
+uint32_t hash (struct number *a, struct number *b, struct number x[]) {
+	
+	struct number ai = {0, 0, 1};
+	struct number r = {r->high, r->mid, r->low};
+	struct number prod = {0, 0, 0};
+	
+	for (int i = 0; i < array_size(x); i++) {
+		multp(&ai, a, &ai);
+		multp(&ai, x[i], &prod);
+		add_to(&r, &prod);
+		
+		if (!(i & (1 << 6) - 1))
+			modp(&r);
+	}
+	multp(&r, b, &r);
+	/*
+	res *= b;
+	res = res % p;
+	res = res % m;
+	*/
+	return r->low;
+}
+
 int main(int argc, char* argv[]) {
 	// Make hash table
 	std::unordered_map<std::string, int> mapa;
@@ -464,7 +507,7 @@ int main(int argc, char* argv[]) {
 	test_add();
 	test_add_larger();
 	std::cout << std::endl;
-	/*
+	
 	test_new00();
 	std::cout << std::endl;
 	test_new11();
@@ -473,13 +516,14 @@ int main(int argc, char* argv[]) {
 	std::cout << std::endl;
 	test_new_first_overflow();
 	std::cout << std::endl;
-	*/
+	
 	test_new_overflow();
 	std::cout << std::endl;
 	
 	test_first_modulo();
 	std::cout << std::endl;
 
+	/*
 	struct number x = { 0, 0, (uint32_t)1 << 22}; // should end up in 23+29 = 42
 	struct number y = { 0, 0, (uint32_t)1 << 29};
 
@@ -516,7 +560,7 @@ int main(int argc, char* argv[]) {
 	std::cout << "Occurences of 'the': " << mapa["the"] << std::endl;
 	in.close();
 
-
+	*/
 
 
 /*
@@ -550,16 +594,4 @@ int main(int argc, char* argv[]) {
 */
 }
 /*
-number hash (a, b) {
-	random a;
-	for (int i = 0; i < d; i++) {
-		a *= a;
-		res += x_i * a_i;
-		res = res % p;
-	}
-	res *= b;
-	res = res % p;
-	res = res % m;
-	return res;
-}
 */
