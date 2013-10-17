@@ -58,13 +58,21 @@ In order to multiply $>32$ bit numbers, in fact several multiplications are need
 \[\begin{matrix}
 & & (a_2 2^{64} + a_1 2^{32} + a_0)\cdot (y_2 2^{} + y_1 2^{32} + y_0) \\
 & \equiv & a_2 y_2 \cdot 2^{39} + [a_2 y_1,a_1 y_2] \cdot 2^7 + \ldots + a_0 y_0  \\
-& \equiv & a_2 y_2 \mod 2^{40} \cdot 2^{31} + a_2 y_2 / 2^{40} + [a_1 y_2, a_2 y_1] \cdot 2^7 \\
+& \equiv & a_2 y_2 \mod 2^{50} \cdot 2^{31} + a_2 y_2 / 2^{50} + [a_1 y_2, a_2 y_1] \cdot 2^7 \\
 & + & [a_2 y_0, a_1 y_1, a_0 a_2] \mod 2^{25} \cdot 2^{64} + [a_2 y_0, a_1 y_1, a_0 a_2] /2^{25} \\
-& + & [a_1 y_0, a_0 y_1] \mod 2^{47} \cdot 2^{32} + [a_1 y_0, a_0 y_1] /2^{47} + a_0 y_0
+& + & [a_1 y_0, a_0 y_1] \mod 2^{57} \cdot 2^{32} + [a_1 y_0, a_0 y_1] /2^{57} + a_0 y_0
 \end{matrix}
 \]
 
 Using the calculation above, we can obtain a sum of $89$-bit numbers. If we also perform modulo on the high-part of the sum, we obtain a $\le 90$-bit number, which leaves us satisfied.
+
+\subsection*{TODO}
+\begin{itemize}
+	\item Restructure implementation code (clean up file, introduce header
+		file etc., consider what should be supported)
+	\item Move tests to separate implementation file (or folder). Consider
+		GMP calculation for comparison.
+\end{itemize}
 
 \section{Unit testing}
 
