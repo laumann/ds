@@ -148,14 +148,14 @@ struct number *multp(struct number *a, struct number *b) {
 	numbers[0].low = low(mults[8]);
 	numbers[0].mid = high(mults[8]);
 
-	numbers[1].low = (uint32_t)(mults[7] >> 47);
-	numbers[2].low = (uint32_t)(mults[6] >> 47);
+	numbers[1].low = (uint32_t)(mults[7] >> 57);
+	numbers[2].low = (uint32_t)(mults[6] >> 57);
 
-	n64 = mults[7] & (((uint64_t)1 << 47) - 1);
+	n64 = mults[7] & (((uint64_t)1 << 57) - 1);
 	numbers[3].mid = low(n64);
 	numbers[3].high = high(n64);
 
-	n64 = mults[6] & (((uint64_t)1 << 47) - 1);
+	n64 = mults[6] & (((uint64_t)1 << 57) - 1);
 	numbers[4].mid = low(n64);
 	numbers[4].high = high(n64);
 
@@ -188,11 +188,11 @@ struct number *multp(struct number *a, struct number *b) {
 	numbers[12].mid = low(mults[1] >> 25);
 	numbers[12].low = low(mults[1] << 7);
 
-	n64 = mults[0] & (((uint64_t)1 << 40) - 1);
+	n64 = mults[0] & (((uint64_t)1 << 50) - 1);
 	numbers[13].high = low(n64 >> 25);
 	numbers[13].mid = low(n64 << 7);
 
-	numbers[14].low = low(mults[0] >> 40);
+	numbers[14].low = low(mults[0] >> 50);
 
 
 	struct number *r = (struct number*)malloc(sizeof(struct number));
@@ -425,7 +425,33 @@ void test_new_overflow() {
 	
 	print_number(result);
 	std::cout << std::endl;
+}
 
+void test_first_modulo() {
+	struct number n1 = {0, ((uint32_t)1 << 30), 0};
+	struct number n2 = {0, 0, ((uint32_t)1 << 32) - 1};
+
+	print_number(&n1);
+	std::cout << std::endl;
+	print_number(&n2);
+	std::cout << std::endl;
+	
+	struct number *result = multp(&n1, &n2);
+	print_number(result);
+	std::cout << std::endl;
+	/*
+	std::cout << "Adding p" << std::endl;
+
+	struct number p = { ((uint32_t)1<<25)-1 ,((uint32_t)1<<32)-1, ((uint32_t)1<<32)-1};
+	print_number(&p);
+	std::cout << std::endl;
+
+	for (int i=0; i < 32; i++) {
+		add_to(result, &p);
+		print_number(result);
+		std::cout << std::endl;
+	}
+	*/
 }
 
 int main(int argc, char* argv[]) {
@@ -449,6 +475,9 @@ int main(int argc, char* argv[]) {
 	std::cout << std::endl;
 	*/
 	test_new_overflow();
+	std::cout << std::endl;
+	
+	test_first_modulo();
 	std::cout << std::endl;
 
 	struct number x = { 0, 0, (uint32_t)1 << 22}; // should end up in 23+29 = 42
