@@ -1,4 +1,4 @@
-CXX=g++-4.7
+CXX=g++
 CXXFLAGS= -Wall -DNDEBUG -O3 -std=c++11
 
 sorting-algorithms:= $(wildcard *.i++)
