@@ -1,15 +1,8 @@
-/*
-#include <algorithm>
-#include <fstream>
-#include <ctype.h>
-#include <unordered_map>
-*/
 
 #include <ctype.h>
 #include <iostream>
 
 #include "dshash.hpp"
-
 
 void usage() {
 	std::cout << "Usage: ./stl_hash <file>" << std::endl;
