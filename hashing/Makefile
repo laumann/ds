@@ -8,15 +8,26 @@ comp:= $(addsuffix .compile, $(sorting-bases))
 
 N = 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576 2097152 4194304 8388608 16777216 33554432
 
+OBJS=dshash.o
+OBJS+=main.o
+
+HDBRS=dshash.hpp
+
+TEST_OBJS=dshash.o
+TEST_OBJS+=dshash_test.o
 
 
-dshash: dshash.cpp dshash.hpp
-	$(CXX) $(CXXFLAGS) $< -o $@
+dshash: $(OBJS) $(HDRS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 
-$(comp): %.compile: %.i++
-	@cp $*.i++ algorithm.i++
-	$(CXX) $(CXXFLAGS) sort-driver.c++ -o $*
-	@rm algorithm.i++
+dshash_test: $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) $(TEST_OBJS) -o $@
+
+#
+#$(comp): %.compile: %.i++
+#	@cp $*.i++ algorithm.i++
+#	$(CXX) $(CXXFLAGS) sort-driver.c++ -o $*
+#	@rm algorithm.i++
 
 $(sort): %.sort : %.compile
 	@rm -f $*.log
@@ -41,6 +52,7 @@ plot:
 
 clean:
 	- rm  -f core a.out algorithm.i++ time.eps *.o 2>/dev/null
+	@rm -f $(OBJS) $(TEST_OBJS) dshash dshash_test
 
 veryclean: clean
 	- rm -f *~ *.log time.pdf 2>/dev/null $(sorting-bases)

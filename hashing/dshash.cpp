@@ -1,6 +1,7 @@
 
 #include <ctype.h>
 #include <iostream>
+#include <cstdlib>
 
 #include "dshash.hpp"
 
@@ -160,6 +161,7 @@ void multp(struct number *a, struct number *b, struct number *result) {
 	modp(result);
 }
 
+/*
 void test_add() {
 	struct number n1 = {0, 0, 21};
 	struct number n2 = {0, 0, 21};
@@ -174,6 +176,7 @@ void test_add() {
 	print_number(&n1);
 	std::cout << std::endl;
 }
+*/
 void test_add_larger() {
 	struct number n1 = {0, ((uint32_t)1<<29)-1, ((uint32_t)1<<32)-1};
 	struct number n2 = {0, 0, ((uint32_t)1<<31)-1 };
@@ -290,7 +293,7 @@ void test_first_modulo() {
 
 #define array_size(x) (sizeof(x)/sizeof(x[0]))
 
-uint32_t hash (struct number *a, struct number *b, struct number x[]) {
+uint32_t hash(struct number *a, struct number *b, struct number x[]) {
 	
 	struct number ai = {0, 0, 1};
 	struct number r = {0, 0, 0};
@@ -306,26 +309,5 @@ uint32_t hash (struct number *a, struct number *b, struct number x[]) {
 	}
 	multp(&r, b, &r);
 	return r.low;
-}
-
-int main(int argc, char* argv[]) {
-	test_add();
-	test_add_larger();
-	std::cout << std::endl;
-	
-	test_new00();
-	std::cout << std::endl;
-	test_new11();
-	std::cout << std::endl;
-	test_new1();
-	std::cout << std::endl;
-	test_new_first_overflow();
-	std::cout << std::endl;
-	
-	test_new_overflow();
-	std::cout << std::endl;
-	
-	test_first_modulo();
-	std::cout << std::endl;
 }
 
