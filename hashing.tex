@@ -1,14 +1,3 @@
-\documentclass[]{article}
-
-\usepackage{float}
-
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
-\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{note}[theorem]{Note}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
@@ -23,13 +12,15 @@
 \newcommand{\Oo}{\mathcal O} %big-O notation
 \newcommand{\oo}{\mathcal o} %small-O notation ;)
 
-\title{Chain hashing for variable length strings}
+\title{Hashing for variable length strings}
 \author{Thomas Laumann Jespersen \and Eva Rotenberg}
 
 \begin{document}
 \maketitle
 
 \section{Theory}
+
+\subsection*{Direct polynomial string hashing}
 
 Given a string $x=x_0 \ldots x_d$ with $x_i < u$, and a codomain $[m]$, let $p$ be a small Mersenne prime larger than $u$ and $m$. We use the following hash function, given random seeds $a,b < p$:
 \[h(x)= \left( b \left( \sum_{i=0}^{d}x_i a^i \right) \mod p \right) \mod m \]
@@ -53,7 +44,7 @@ res = res mod p
 
 As earlier noted, we can use the congruence $x \equiv x\mod 2^q + \lfloor x / 2^q \rfloor$, to make quicker calculations modulo a Mersenne prime, $2^q -1$.
 
-In order to multiply $>32$ bit numbers, in fact several multiplications are needed. When multiplying two circa $89$ bit numbers, we split each number into two parts: $a = a_2\cdot 2^{64} + a_1 \cdot 2^{32} + a_0$, and similarly, $y = y_2\cdot y^{64} + y_1 \cdot 2^{32} + y_0$, where $a_i$ and $y_j$ are all $32$-bit numbers. Then, we calculate all the multiplications $a_i y_j$. To find the mod p value of $ay$, we analyse each summand, which is on the form $a_i y_j \cdot 2^{k}$, where $a_i y_j$ is a $64$ bit number. Using the congruence above, when $k>q$, we do not need to add the first summand $a_i y_j \cdot 2^k \mod 2^q = 0$, and need only add $a_i y_j \cdot 2^{k-q}$. Symmetrically, $a_0 y_0$ only contributes with the first summand, as $a_0 y_0 < 2^q$. For $k<q$ we have the equivalence $a_i y_j 2^k \equiv (a_i y_j \mod 2^{q-k})\cdot 2^k + a_i y_j / 2^{q-k}$.
+In order to multiply $>32$ bit numbers, in fact several multiplications are needed. When multiplying two circa $89$ bit numbers, we split each number into two parts: $a = a_2\cdot 2^{64} + a_1 \cdot 2^{32} + a_0$, and similarly, $y = y_2\cdot y^{64} + y_1 \cdot 2^{32} + y_0$, where $a_i$ and $y_j$ are all $32$-bit numbers. Then, we calculate all the multiplications $a_i y_j$. To find the mod p value of $ay$, we analyse each summand, which is on the form $a_i y_j \cdot 2^{k}$, where $a_i y_j$ is a $64$ bit number. Using the congruence above, when $k>q$, we do not need to add the first summand $a_i y_j \cdot 2^k \mod 2^q = 0$, and need only add $a_i y_j \cdot 2^{k-q}$. Symmetrically, $a_0 y_0$ only contributes with the first summand, as $a_0 y_0 < 2^q$. For $k<q$ we have the equivalence $a_i y_j 2^k \equiv (a_i y-_j \mod 2^{q-k})\cdot 2^k + a_i y_j / 2^{q-k}$.
 
 \[\begin{matrix}
 & & (a_2 2^{64} + a_1 2^{32} + a_0)\cdot (y_2 2^{} + y_1 2^{32} + y_0) \\
@@ -66,20 +57,33 @@ In order to multiply $>32$ bit numbers, in fact several multiplications are need
 
 Using the calculation above, we can obtain a sum of $89$-bit numbers. If we also perform modulo on the high-part of the sum, we obtain a $\le 90$-bit number, which leaves us satisfied.
 
-\subsection*{TODO}
-\begin{itemize}
-	\item Restructure implementation code (clean up file, introduce header
-		file etc., consider what should be supported)
-	\item Move tests to separate implementation file (or folder). Consider
-		GMP calculation for comparison.
-\end{itemize}
+\subsection*{Wrapped polynomial string hashing}
+
+The algorithm above runs too slowly for large strings. To speed it up, we consider the following "wrapper". 
+
+Given a fast universal hash function
+\[r : [2^{64}]^d \to [2^{64}] \]
+
+We can divide the input into chunks $X_0 \ldots X_j$, such that each $X_i$ contains $32$ integers of $64$ bits for $i<j$, and $X_j$ contains at most $32$ integers. Then apply $r$ to each $X_i$, $i=0\ldots j$, obtaining the sequence $\left(r(X_0), \ldots , r(X_j)\right)$. This sequence is a much shorter string, to which we can apply polynomial string hashing.
+
+As a fast universal hash function, we concatinate two versions, $r_1$ and $r_2$ of pair-multiply-shift:
+\[r_1(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(a_{2i} + x_{2i})(a_{2i+1} + x_{2i+1}) \right)+b \right) [\bar{w}-l,\bar{w}]\]
+\[r_2(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(\alpha_{2i} + x_{2i})(\alpha_{2i+1} + x_{2i+1}) \right)+\beta \right) [\bar{w}-l,\bar{w}]\]
+Where $a_i,b_i,\alpha_i,\beta_i$ are random integers, and where $n[\bar{w}-l,\bar{w}]$ is the $l$ bit number consisting of bit $\bar{w}-l$ to bit $\bar{w}$ of the number $n$.
+
+\section{Implementation}
+
+\paragraph{Number struct}
+\paragraph{Direct PSH} 
+\paragraph{Pair-multiply-shift}
+\paragraph{Wrapped PSH}
 
 \section{Unit testing}
 
 \paragraph{Multiply mod $p = 2^{81} -1$.} To test correctness of out mod-$p$-multiplier, we multiply two random numbers $a,b$ using a black-box multiplication function we assume to work obtaining the product $a*b$. Then we calculate our mod-$p$ product, $a\cdot b$. If the difference is divisible by $p$, we are happy. We calculate: 
 $$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
 
-We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
+%We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
 
 \section{Experiment}
 We compare our function with the c++ standard library. As objects we have downloaded books in different languages from The Gutenberg Project. 
