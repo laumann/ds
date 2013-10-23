@@ -180,6 +180,7 @@ void test_add() {
 
 #define array_size(x) (sizeof(x)/sizeof(x[0]))
 
+/*
 uint32_t hash(struct number *a, struct number *b, struct number x[]) {
 	
 	struct number ai = {0, 0, 1};
@@ -197,4 +198,5 @@ uint32_t hash(struct number *a, struct number *b, struct number x[]) {
 	multp(&r, b, &r);
 	return r.low;
 }
+*/
 

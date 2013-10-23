@@ -37,14 +37,15 @@ int main(int argc, char *argv[]) {
 	struct number r = {0, 0, 1};
 	struct number prod = {0, 0, 0};
 
+	/*
 	print_number(&a);
 	std::cout << std::endl;
 
 	print_number(&b);
 	std::cout << std::endl;
+	*/
 
 	int i =0;
-	// start timer
   	std::clock_t start = std::clock();
 	for (in >> c; in.good(); in >> c) {
 		n.low = (uint32_t)c;
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
   	std::clock_t stop = std::clock();
   	double running_time = double(stop - start) / double(CLOCKS_PER_SEC);
 	std::cout << "Running time: " << running_time << std::endl;
-	// end timer
+
 	in.close();
 	std::cout << "Number of iterations: " << i << std::endl;
 	print_bits_32(r.low);
