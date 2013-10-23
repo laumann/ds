@@ -12,9 +12,9 @@ void usage() {
 
 
 /**
- * Internal use (so far)
+ * Print the bits of a 96-bit number
  */
-static void print_number(struct number *n) {
+void print_number(struct number *n) {
 	uint32_t mask = (uint32_t)1 << 31; //0x8000000000000000;
 	for (; mask; mask >>= 1)
 		std::cout << (n->high&mask ? 1 : 0);

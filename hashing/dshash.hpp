@@ -38,7 +38,8 @@ struct number {
 /**
  * Function declarations
  */
-//void print_number(struct number *);
+void print_number(struct number *);
+void modp(struct number *);
 
 /**
  * Add the second number to the first. That is, the first number will be
@@ -51,5 +52,7 @@ void add_to(struct number *, struct number*);
  * Multiply two numbers modulo p (2^89 - 1)
  */
 void multp(struct number *, struct number *, struct number *);
+
+
 
 #endif
