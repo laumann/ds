@@ -2,6 +2,7 @@
 * tage tid på vores hashfunktion
 * sammenholde med std. impl. i C++ (unordered set)
 * 8 chars af gangen.
+* implementer auto-fetch af tilfældige tal
 
 ----
 

@@ -19,8 +19,19 @@ static void print_bits_32(uint32_t n) {
 		std::cout << (n&mask ? 1 : 0);
 }
 
+#define charbits(c) do {			\
+	int mask = 1 << 7;			\
+	for (; mask; mask >>= 1)		\
+		printf("%d", (c&mask) ? 1 : 0);	\
+	printf("\n");				\
+	} while (0)
+
+#define low8(c) ((uint32_t)c & ((1<<8)-1))
+
 int main(int argc, char *argv[]) {
+
 	if (argc < 2) {
+		std::cout << "Usage: ./dshash <file>" << std::endl;
 		std::exit(0);
 	}
 	std::ifstream in(argv[1], std::ifstream::binary);
@@ -37,26 +48,51 @@ int main(int argc, char *argv[]) {
 	struct number r = {0, 0, 1};
 	struct number prod = {0, 0, 0};
 
-	/*
-	print_number(&a);
-	std::cout << std::endl;
 
-	print_number(&b);
-	std::cout << std::endl;
-	*/
+	/**
+	 * One char takes up 8 bits, and we want compute on 64 bits, meaning we
+	 * read 8 chars (8^2 = 64). The zero
+	 */
+	int nchar = 0;
 
-	int i =0;
+
+	/**
+	 * Count number of iterations
+	 */
+	int i = 0;
+
   	std::clock_t start = std::clock();
-	for (in >> c; in.good(); in >> c) {
-		n.low = (uint32_t)c;
+	for (in >> c; in.good(); in >> c, ++i) {
+		//std::cout << "Adding "; charbits(c);
 
+		if (nchar < 4) {
+			n.low |= (low8(c) << (nchar*8));
+		} else {
+			n.mid |= (low8(c) << ((nchar -4)*8));
+		}
+
+		nchar++;
+		if (nchar == 8) {
+		//	std::cout << "Mult! "; print_number(&n); std::cout << std::endl;
+
+			multp(&ai, &a, &ai);
+			multp(&ai, &n, &prod);
+			add_to(&r, &prod);
+
+			if (!((i & (1 << 6)) - 1))
+				modp(&r);
+			nchar = n.high = n.mid = n.low = 0;
+		}
+	}
+	if (nchar > 0) {
+		//std::cout << "Mult! "; print_number(&n); std::cout << std::endl;
 		multp(&ai, &a, &ai);
 		multp(&ai, &n, &prod);
 		add_to(&r, &prod);
-		
-		if (!((++i & (1 << 6)) - 1))
-			modp(&r);
+		modp(&r);
 	}
+	multp(&r, &b, &r);
+
   	std::clock_t stop = std::clock();
   	double running_time = double(stop - start) / double(CLOCKS_PER_SEC);
 	std::cout << "Running time: " << running_time << std::endl;
