@@ -20,7 +20,7 @@
  */
 
 void usage(int argc, char **argv) {
-	std::cerr << "Usage: " << argv[0] << " <file>" << std::endl;
+	std::cerr << "Usage: " << argv[0] << " <file> [N]" << std::endl;
 	exit(1);
 }
 
@@ -37,10 +37,25 @@ std::string get_file_contents(const char *filename) {
 	throw errno;
 }
 
+void print_lots() {
+	int j = 1;
+	for (int i = 1; i < 10000; i++) {
+		std::cout << '.';
+		j *= i;
+	}
+	std::cout << j << std::endl;
+}
+
 int main(int argc, char** argv) {
 
 	if (argc < 2)
 		usage(argc, argv);
+
+	int repetitions = 1;
+	if (argc > 2)
+		repetitions = std::atoi(argv[2]);
+
+	std::vector<std::string> input;
 
 	/**
 	 * (1) Initialize
@@ -57,24 +72,58 @@ int main(int argc, char** argv) {
 	}
 
 	/**
-	 * Iterate
+	 * Read in texts
 	 */
 	std::string line;
 	std::string contents;
-	while (std::getline(inf, line)) {
-		std::cout << "Reading file: " << line;
+	while (std::getline(inf, line))
+		input.push_back(line);
+	inf.close();
+	
+	std::cout << "Input size " << input.size() << std::endl;
+	std::clock_t start, stop;
+	std::vector<double> time_sums(input.size(), 0);
+	
+	for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
+		std::cout << *it << std::endl;
+	}
+
+	for (int i=0; i < repetitions; i++) {
+		set.clear();
+
+		start = std::clock();
+		for (int j = 0; j < input.size(); j++) {
+			set.insert(input[j]);
+			
+			// Add insertion time to correct index
+			//std::cout << "start: " << start/double(CLOCKS_PER_SEC) << std::endl;
+			//std::cout << "end:   " << stop/double(CLOCKS_PER_SEC) << std::endl;
+			time_sums[j] += double(stop-start) / double(CLOCKS_PER_SEC);
+		}
+		stop = std::clock();
+	}
+
+	for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
+		std::cout << (*it)/(double)repetitions << std::endl;
+	}
+
+	//while (std::getline(inf, line)) {
+	//	std::cout << "Reading file: " << line;
 		/**
 		 * Read in the indicated book somehow and pass it to the
 		 * 'insert' function
 		 */
-		contents = get_file_contents(line.c_str());
-		std::cout << " (size: " << contents.size() << ")" << std::endl;
-		set.insert(contents);
+	//	contents = get_file_contents(line.c_str());
+	//	std::cout << " (size: " << contents.size() << ")" << std::endl;
+		
+	//	start = std::clock();
+	//	set.insert(contents);
+	//	end = std::clock();
 
-	}
-	inf.close();
+	//}
+	//inf.close();
 
-	std::cout << "Read " << set.size() << " lines" << std::endl;
+	//std::cout << "Read " << set.size() << " lines" << std::endl;
 
 	return 0;
 
