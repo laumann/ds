@@ -2,6 +2,12 @@ TODO
 ----
  * sammenholde med std. impl. i C++ (unordered set)
  * implementer auto-fetch af tilfældige tal
+ * testing
+   - Implementer hash-driver (hotbox.c)
+   - From C++ STL we use unordered_map
+   - The keys hash are arbitrary length text strings
+   - An alternative approach could be to hash 64-bit keys obtained by combining
+     8 input characters.
 
 IN PROGRESS
 -----------
@@ -9,4 +15,4 @@ IN PROGRESS
 
 DONE
 ----
- * 8 chars ad gangen
+ * 8 chars ad gange
