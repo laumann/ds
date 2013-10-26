@@ -1,6 +1,5 @@
 TODO
 ----
- * sammenholde med std. impl. i C++ (unordered set)
  * implementer auto-fetch af tilfældige tal
  * testing
    - Implementer hash-driver (hotbox.c)

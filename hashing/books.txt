@@ -1,0 +1,11 @@
+books/charles-dickens-oliver-twist.txt
+books/dante-divina-commedia.txt
+books/dostoyevsky-the-idiot.txt
+books/faust-eine-tragodie.txt
+books/herman-bang-tine.txt
+books/james-joyce-ulysses.txt
+books/jane-austen-pride-prejudice.txt
+books/joao-camara-contos.txt
+books/kant-kritk-der-reinen-vernuft.txt
+books/machievlli-the-prince.txt
+books/nietzsche-zarathustra.txt

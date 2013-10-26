@@ -21,6 +21,7 @@ static void print_bits_32(uint32_t n) {
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
+		std::cout << "Usage: ./dshash <file>" << std::endl;
 		std::exit(0);
 	}
 	std::ifstream in(argv[1], std::ifstream::binary);
