@@ -1,0 +1,55 @@
+Hashing charles-dickens-oliver-twist.txt (size: 936251	books/charles-dickens-oliver-twist.txt)
+Running time: 0.1
+Number of iterations: 936251
+00000001011111100101010101110000
+25056624
+Hashing dante-divina-commedia.txt (size: 590626	books/dante-divina-commedia.txt)
+Running time: 0.05
+Number of iterations: 590626
+11000100010110111011010000000001
+3294344193
+Hashing dostoyevsky-the-idiot.txt (size: 1396963	books/dostoyevsky-the-idiot.txt)
+Running time: 0.12
+Number of iterations: 1396963
+10100111110110000001010001101000
+2815956072
+Hashing faust-eine-tragodie.txt (size: 232542	books/faust-eine-tragodie.txt)
+Running time: 0.02
+Number of iterations: 232542
+10111000100111011101111001001010
+3097353802
+Hashing herman-bang-tine.txt (size: 296551	books/herman-bang-tine.txt)
+Running time: 0.02
+Number of iterations: 296551
+10111111011000110111001001001000
+3210965576
+Hashing james-joyce-ulysses.txt (size: 1573150	books/james-joyce-ulysses.txt)
+Running time: 0.14
+Number of iterations: 1573150
+00100001010100100011010110000001
+559035777
+Hashing jane-austen-pride-prejudice.txt (size: 725060	books/jane-austen-pride-prejudice.txt)
+Running time: 0.06
+Number of iterations: 725060
+01100001000110000111001111101010
+1628992490
+Hashing joao-camara-contos.txt (size: 184116	books/joao-camara-contos.txt)
+Running time: 0.01
+Number of iterations: 184116
+11001010001110011001111111010010
+3392774098
+Hashing kant-kritk-der-reinen-vernuft.txt (size: 1339533	books/kant-kritk-der-reinen-vernuft.txt)
+Running time: 0.12
+Number of iterations: 1339533
+01110000010001110011011000001111
+1883715087
+Hashing machievlli-the-prince.txt (size: 305864	books/machievlli-the-prince.txt)
+Running time: 0.02
+Number of iterations: 305864
+10110110111100100001101000111111
+3069319743
+Hashing nietzsche-zarathustra.txt (size: 563041	books/nietzsche-zarathustra.txt)
+Running time: 0.05
+Number of iterations: 563041
+10110000100000011101010111010111
+2961298903
