@@ -1,7 +1,5 @@
 #include <algorithm>  // std::random_shuffle
-//#include "algorithm.i++" // K defined here
 //#undef NDEBUG
-#include "hash.ipp" // Hash
 #include <cassert>
 #include <ctime>
 #include <cerrno>
@@ -14,6 +12,11 @@
 
 #include <unordered_set>
 
+#include "hash.ipp" // Hash and Key should be defined here
+
+/**
+ * Usage function
+ */
 void usage(int argc, char *argv[]) {
 	std::cout << "Usage: " << argv[0] << " <file> [N]" << std::endl;
 	exit(0);
@@ -22,10 +25,7 @@ void usage(int argc, char *argv[]) {
 /**
  * Reads a file, and for each line, treats the text as the (relative) path to a
  * text file to hash.
- *
- * Runs a preset number of iterations hashing the files indicated
  */
-
 std::string get_file_contents(const char *filename) {
 	std::ifstream in(filename, std::ios::in | std::ios::binary);
 	if (in) {
@@ -55,12 +55,12 @@ int main(int argc, char** argv) {
 	 */
 	std::ifstream inf(argv[1]);
 	if (!inf.is_open()) {
-		std::cout << "Error: file not opened" << std::endl;
+		std::cout << "Error: file '" << argv[1] << "' could not be opened." << std::endl;
 		exit(1);
 	}
 
 	/**
-	 * Read in texts
+	 * Read in contents of indicated files
 	 */
 	std::string line;
 	std::string contents;
@@ -68,7 +68,6 @@ int main(int argc, char** argv) {
 		input.push_back(line);
 	inf.close();
 	
-	std::cout << "Input size " << input.size() << std::endl;
 	std::clock_t start, stop;
 	std::vector<double> time_sums(input.size(), 0);
 	
@@ -80,8 +79,10 @@ int main(int argc, char** argv) {
 
 		for (uint32_t j = 0; j < input.size(); j++) {
 			start = std::clock();
+
 			set->insert(input[j]);
 			set->find(input[j]);
+
 			stop = std::clock();
 			
 			// Add insertion time to correct index
@@ -91,7 +92,7 @@ int main(int argc, char** argv) {
 		delete set;
 	}
 
-	std::cout << std::setprecision(10) << std::fixed;
+	std::cout << std::setprecision(10) << std::fixed << std::endl << "Repetitions: " << repetitions << std::endl;
 	for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
 		std::cout << (*it)/(double)repetitions << std::endl;
 	}

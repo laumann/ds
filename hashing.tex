@@ -5,6 +5,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{xspace}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
@@ -24,6 +25,7 @@
 \newcommand{\oo}{\mathcal o} %small-O notation ;)
 
 \newcommand{\funk}[1]{\small\texttt{#1}}
+\newcommand{\cpp}{C+\!+\xspace}
 
 \title{Hashing for variable length strings}
 \author{Thomas Laumann Jespersen \and Eva Rotenberg}
@@ -72,7 +74,7 @@ Using the calculation above, we can obtain a sum of $89$-bit numbers. If we also
 
 \subsection*{Wrapped polynomial string hashing}
 
-The algorithm above runs too slowly for large strings. To speed it up, we consider the following "wrapper". 
+The algorithm above runs too slowly for large strings. To speed it up, we consider the following ``wrapper''. 
 
 Given a fast universal hash function
 \[r : [2^{64}]^d \to [2^{64}] \]
@@ -92,13 +94,23 @@ This section covers implementation details and different testing and benchmarkin
 
 The basic representation we employed for a 89-bit number is simply a \funk{struct} wrapping the 32-bit (unsigned) integers. This was chosen rather than one 32 bit number, as it simplifies the multiplication process allowing us to multiply any two segments from two \funk{struct}s and have the result fit in 64 bits.
 
+\begin{verbatim}
+struct number {
+        uint32_t high;
+        uint32_t mid;
+        uint32_t low;
+};
+\end{verbatim}
+
 We implement addition, modulo $p$ and multiplication modulo $p$ for the number \funk{struct}s. Both \funk{add\_to(a, b)} and \funk{modp(a)} modify their first argument.
 
-The functino \funk{multp(a, b, res)} implements the multiplication of two 89-bit numbers modulo $p$.
+The function \funk{multp(a, b, res)} implements the multiplication of two 89-bit numbers modulo $p$, placing the result in the third variable \funk{res}.
+
+Doing modulo $m$ when $m = 32$ simply implies returning \funk{n.low}
 
 \paragraph{Direct PSH}
 
-The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). 
+The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed.
 
 \paragraph{Pair-multiply-shift}
 \paragraph{Wrapped PSH}
@@ -111,6 +123,10 @@ $$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
 %We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
 
 \section{Experiment}
-We compare our function with the c++ standard library. As objects we have downloaded books in different languages from The Gutenberg Project. 
+We compare our function with the \cpp standard library (\funk{unordered\_set}). As objects we have downloaded books in different languages from The Gutenberg Project.
+
+The experimentation can be performed in various ways. We could opt to implement a complete stand-alone hash table, or attempt to conform to the \funk{Hash} type.
+
+We have considered both
 
 \end{document}
