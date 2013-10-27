@@ -184,6 +184,8 @@ namespace dshash_wrapped {
 	uint32_t reduce(uint64_t *x, size_t size, size_t offset) {
 		uint64_t res = 0;
 
+		std::cout << "Reducing" << std::endl;
+
 		for (unsigned i = 0; i < size; i++) {
 			int sub1 = (i<<1)+offset;
 			int sub2 = sub1 + 1;
@@ -205,6 +207,8 @@ namespace dshash_wrapped {
 
 			s >> std::noskipws;
 
+			std::cout << "Hashing " << std::endl;
+
 			/**
 			 * Algo:
 			 *  - process the stream 8 bits at a time, gather 64 bit numbers
@@ -225,12 +229,13 @@ namespace dshash_wrapped {
 			int i = 0;
 			int nchar = 0;
 			for (s >> c; s.good(); s >> c) {
-				//if (nchar < 8) {
 				if (nchar < 8) {
-					x |= (low8(c) << (nchar << 3));
+					x |= (low8(c) << (nchar++ << 3));
 				} else {
 					// gathered 64 bits
 					xs[xsz++] = x;
+					std::cout << x;
+					std::cout << "Got number xs[" << xsz << "] = " << xs[xsz-1] << std::endl;
 					nchar = 0;
 					if (xsz == 32) {
 						uint32_t *np = high ? &n.mid : &n.low;

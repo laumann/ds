@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 	std::string line;
 	std::string contents;
 	while (std::getline(inf, line))
-		input.push_back(line);
+		input.push_back(get_file_contents(line.c_str()));
 	inf.close();
 	
 	std::clock_t start, stop;
