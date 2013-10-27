@@ -23,6 +23,8 @@
 \newcommand{\Oo}{\mathcal O} %big-O notation
 \newcommand{\oo}{\mathcal o} %small-O notation ;)
 
+\newcommand{\funk}[1]{\small\texttt{#1}}
+
 \title{Hashing for variable length strings}
 \author{Thomas Laumann Jespersen \and Eva Rotenberg}
 
@@ -84,8 +86,20 @@ Where $a_i,b_i,\alpha_i,\beta_i$ are random integers, and where $n[\bar{w}-l,\ba
 
 \section{Implementation}
 
+This section covers implementation details and different testing and benchmarking schemes attempted.
+
 \paragraph{Number struct}
-\paragraph{Direct PSH} 
+
+The basic representation we employed for a 89-bit number is simply a \funk{struct} wrapping the 32-bit (unsigned) integers. This was chosen rather than one 32 bit number, as it simplifies the multiplication process allowing us to multiply any two segments from two \funk{struct}s and have the result fit in 64 bits.
+
+We implement addition, modulo $p$ and multiplication modulo $p$ for the number \funk{struct}s. Both \funk{add\_to(a, b)} and \funk{modp(a)} modify their first argument.
+
+The functino \funk{multp(a, b, res)} implements the multiplication of two 89-bit numbers modulo $p$.
+
+\paragraph{Direct PSH}
+
+The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). 
+
 \paragraph{Pair-multiply-shift}
 \paragraph{Wrapped PSH}
 

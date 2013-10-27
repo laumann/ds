@@ -22,3 +22,6 @@ assg2/23tree
 *.aux
 *.zip
 dshash
+hash.ipp
+std
+hotbox
