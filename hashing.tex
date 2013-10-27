@@ -1,5 +1,6 @@
 \documentclass[]{article}
 
+\usepackage{graphicx}
 \usepackage{float}
 
 \usepackage{amsmath}
@@ -63,7 +64,7 @@ In order to multiply $>32$ bit numbers, in fact several multiplications are need
 
 \[\begin{matrix}
 & & (a_2 2^{64} + a_1 2^{32} + a_0)\cdot (y_2 2^{} + y_1 2^{32} + y_0) \\
-& \equiv & a_2 y_2 \cdot 2^{39} + [a_2 y_1,a_1 y_2] \cdot 2^7 + \ldots + a_0 y_0  \\
+& \equiv & a_2 y_2 \cdot 2^{39} + [a_2 y_1,a_1 y_2] \cdot 2^7 + \ldots + a_0 y_0 \\
 & \equiv & a_2 y_2 \mod 2^{50} \cdot 2^{31} + a_2 y_2 / 2^{50} + [a_1 y_2, a_2 y_1] \cdot 2^7 \\
 & + & [a_2 y_0, a_1 y_1, a_0 a_2] \mod 2^{25} \cdot 2^{64} + [a_2 y_0, a_1 y_1, a_0 a_2] /2^{25} \\
 & + & [a_1 y_0, a_0 y_1] \mod 2^{57} \cdot 2^{32} + [a_1 y_0, a_0 y_1] /2^{57} + a_0 y_0
@@ -74,7 +75,7 @@ Using the calculation above, we can obtain a sum of $89$-bit numbers. If we also
 
 \subsection*{Wrapped polynomial string hashing}
 
-The algorithm above runs too slowly for large strings. To speed it up, we consider the following ``wrapper''. 
+The algorithm above runs too slowly for large strings. To speed it up, we consider the following ``wrapper''.
 
 Given a fast universal hash function
 \[r : [2^{64}]^d \to [2^{64}] \]
@@ -119,14 +120,33 @@ The direct hashing method goes over an input stream of arbitrary length and lump
 
 \paragraph{Multiply mod $p = 2^{81} -1$.} To test correctness of out mod-$p$-multiplier, we multiply two random numbers $a,b$ using a black-box multiplication function we assume to work obtaining the product $a*b$. Then we calculate our mod-$p$ product, $a\cdot b$. If the difference is divisible by $p$, we are happy. We calculate: 
 $$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
+%TODO: Actually perform this unit test!
 
 %We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
 
 \section{Experiment}
-We compare our function with the \cpp standard library (\funk{unordered\_set}). As objects we have downloaded books in different languages from The Gutenberg Project.
+First, we examine the time-performance of the direct polynomial string hashing. We expect the number of iterations to grow linearly with the file size, and thus the time to grow linearly as well.
+As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project. 
 
-The experimentation can be performed in various ways. We could opt to implement a complete stand-alone hash table, or attempt to conform to the \funk{Hash} type.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{./directPoly}
+\caption{Time consumption as a function of file-size for Direct PSH.}
+\label{fig:directPoly}
+\end{figure}
 
-We have considered both
+We compare our function with the \cpp standard library (\funk{unordered\_set}). %As objects we have downloaded books in different languages from The Gutenberg Project.
+
+The experimentation can be performed in various ways. We could opt to implement a complete stand-alone hash table, or attempt to conform to the \funk{Hash} type. We decided to conform to the \funk{Hash} type, to reduce variability, and to make a more fair comparison between the two hash-functions.
+
+
+
+(figure)
+
+Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka . %TODO: hvad er speedup?
+
+(figure)
+
+Since we also implemented our own version of Pair-multiply-shift, we also compare that to the standard library. 
 
 \end{document}
