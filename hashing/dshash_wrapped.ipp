@@ -181,13 +181,15 @@ namespace dshash_wrapped {
 	/**
 	 * A reduction algorithm
 	 */
-	uint32_t reduce(uint64_t *x[], size_t size) {
+	uint32_t reduce(uint64_t *x, size_t size, size_t offset) {
 		uint64_t res = 0;
 
 		for (unsigned i = 0; i < size; i++) {
-			res += (random_numbers[i<<1] + (*x)[i<<1]) * (random_numbers[(i<<1)+1] + (*x)[(i<<1)+1]);
+			int sub1 = (i<<1)+offset;
+			int sub2 = sub1 + 1;
+			res += (random_numbers[sub1] + x[sub1]) * (random_numbers[sub2] + x[sub2]);
 		}
-		res += random_numbers[32];
+		res += random_numbers[32+offset];
 
 		return high(res);
 	}
@@ -196,15 +198,23 @@ namespace dshash_wrapped {
 	/**
 	 * A hasher. This is magic obtained from various sources including:
 	 *
-	 *
-	 * TODO Construct list of size max 32 of uint64_t, pass it to reduce
 	 */
 	struct hasher {
 		size_t operator () (const std::string& key) const {
-
 			std::istringstream s(key);
 
 			s >> std::noskipws;
+
+			/**
+			 * Algo:
+			 *  - process the stream 8 bits at a time, gather 64 bit numbers
+			 *  - when full, call reduce(xs)
+			 *  - if 'high' then we have a new number we can multiply by
+			 */
+			uint64_t xs[32];
+			uint64_t x = 0;
+			size_t xsz = 0;
+			bool high = false;
 
 			char c;
 			struct number n = { 0, 0, 0 };
@@ -215,27 +225,50 @@ namespace dshash_wrapped {
 			int i = 0;
 			int nchar = 0;
 			for (s >> c; s.good(); s >> c) {
-				if (nchar < 4)
-					n.low |= (low8(c)) << (nchar << 3);
-				else
-					n.mid |= (low8(c)) << ((nchar - 4) << 3);
-			
-				if (nchar == 8) {
-					multp(&ai, &a, &ai);
-					multp(&ai, &n, &prod);
-					add_to(&r, &prod);
-
-					if (!((++i & (1 << 6)) - 1))
-						modp(&r);
-					nchar = n.high = n.mid = n.low = 0;
+				//if (nchar < 8) {
+				if (nchar < 8) {
+					x |= (low8(c) << (nchar << 3));
+				} else {
+					// gathered 64 bits
+					xs[xsz++] = x;
+					nchar = 0;
+					if (xsz == 32) {
+						uint32_t *np = high ? &n.mid : &n.low;
+						*np = reduce(xs, 32, high ? 0 : 32);
+						// put reduced value in low or high
+						// if high, then we have a full number and can do normal multiplication
+						if (high) {
+							multp(&ai, &a, &ai);
+							multp(&ai, &n, &prod);
+							add_to(&r, &prod);
+							if (!((++i & (1 << 6))) - 1)
+								modp(&r);
+							high = false;
+						} else {
+							high = true;
+						}
+						xsz = 0;
+					}
 				}
 			}
-			if (nchar > 0) {
+			/**
+			 * Identify if we need to multiply a remaining chunk 
+			 */
+			if (xsz > 0) {
+				if (nchar < 8) {
+					xs[xsz++] = x;
+				}
+
+				if (high) {
+					n.mid = reduce(xs, xsz, 32);
+				} else {
+					n.mid = 0;
+					n.low = reduce(xs, xsz, 0);
+				}
 				multp(&ai, &a, &ai);
 				multp(&ai, &n, &prod);
 				add_to(&r, &prod);
 				modp(&r);
-
 			}
 			multp(&r, &b, &r);
 			return n.low;
