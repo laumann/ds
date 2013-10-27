@@ -28,6 +28,7 @@
 #define low(x) ((uint32_t)low64(x))
 
 #define low8(c) ((uint32_t)c & ((1<<8)-1))
+#define low8_64(c)((uint64_t)c & ((1<<8)-1))
 
 /**
  * Speed improvement:
@@ -207,7 +208,7 @@ namespace dshash_wrapped {
 
 			s >> std::noskipws;
 
-			std::cout << "Hashing " << std::endl;
+			std::cout << "Hashing ###" << key << "###" << std::endl;
 
 			/**
 			 * Algo:
@@ -230,12 +231,13 @@ namespace dshash_wrapped {
 			int nchar = 0;
 			for (s >> c; s.good(); s >> c) {
 				if (nchar < 8) {
-					x |= (low8(c) << (nchar++ << 3));
+					//std::cout << "c = " << c << std::endl;
+					x |= (low8_64(c) << (nchar++ << 3));
+					//std::cout << "x = " << x << std::endl;
 				} else {
 					// gathered 64 bits
 					xs[xsz++] = x;
-					std::cout << x;
-					std::cout << "Got number xs[" << xsz << "] = " << xs[xsz-1] << std::endl;
+					//std::cout << "Got number xs[" << xsz << "] = " << xs[xsz-1] << std::endl;
 					nchar = 0;
 					if (xsz == 32) {
 						uint32_t *np = high ? &n.mid : &n.low;
@@ -260,6 +262,7 @@ namespace dshash_wrapped {
 			 * Identify if we need to multiply a remaining chunk 
 			 */
 			if (xsz > 0) {
+				//std::cout << "What up?!?" << std::endl;
 				if (nchar < 8) {
 					xs[xsz++] = x;
 				}

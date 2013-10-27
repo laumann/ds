@@ -14,6 +14,12 @@
 
 #include "hash.ipp" // Hash and Key should be defined here
 
+#include <string>
+#include <iterator>
+#include <algorithm>
+#include <streambuf>
+#include <sstream>
+
 /**
  * Usage function
  */
@@ -26,15 +32,19 @@ void usage(int argc, char *argv[]) {
  * Reads a file, and for each line, treats the text as the (relative) path to a
  * text file to hash.
  */
-std::string get_file_contents(const char *filename) {
-	std::ifstream in(filename, std::ios::in | std::ios::binary);
+void get_file_contents(const char *filename, std::string *dest) {
+	std::ifstream in(filename, std::ios::in);
 	if (in) {
-		std::string contents;
+		//std::string contents;
 		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.read(&contents[0], contents.size());
+		dest->resize(in.tellg());
+		//contents.resize(in.tellg());
+		in.read(&(*dest)[0], dest->size());
+		//in.read(&contents[0], contents.size());
+		std::cout << *dest << std::endl;
 		in.close();
-		return contents;
+		return;
+		//return contents;
 	}
 	throw errno;
 }
@@ -63,11 +73,18 @@ int main(int argc, char** argv) {
 	 * Read in contents of indicated files
 	 */
 	std::string line;
-	std::string contents;
-	while (std::getline(inf, line))
-		input.push_back(get_file_contents(line.c_str()));
+	std::ifstream in;
+	while (std::getline(inf, line)) {
+		in.open(line.c_str(), std::ios::in | std::ios::binary);
+		if (in.is_open()) {
+			std::ostringstream out;
+			out << in.rdbuf();
+			input.push_back(out.str());
+			in.close();
+		}
+	}
 	inf.close();
-	
+
 	std::clock_t start, stop;
 	std::vector<double> time_sums(input.size(), 0);
 	
@@ -81,7 +98,7 @@ int main(int argc, char** argv) {
 			start = std::clock();
 
 			set->insert(input[j]);
-			set->find(input[j]);
+			//set->find(input[j]);
 
 			stop = std::clock();
 			
@@ -92,9 +109,11 @@ int main(int argc, char** argv) {
 		delete set;
 	}
 
-	std::cout << std::setprecision(10) << std::fixed << std::endl << "Repetitions: " << repetitions << std::endl;
-	for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
-		std::cout << (*it)/(double)repetitions << std::endl;
+	std::cout << std::setprecision(10) << std::fixed << std::endl << "Based on " << repetitions << " repetitions" << std::endl;
+	std::cout << "Size (bytes)  Time (seconds)" << std::endl;
+	//for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
+	for (int i = 0; i < input.size(); i++) {
+		std::cout << input[i].size() << time_sums[i]/(double)repetitions << std::endl;
 	}
 
 	return 0;
