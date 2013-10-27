@@ -185,8 +185,6 @@ namespace dshash_wrapped {
 	uint32_t reduce(uint64_t *x, size_t size, size_t offset) {
 		uint64_t res = 0;
 
-		std::cout << "Reducing" << std::endl;
-
 		for (unsigned i = 0; i < size; i++) {
 			int sub1 = (i<<1)+offset;
 			int sub2 = sub1 + 1;
@@ -207,8 +205,6 @@ namespace dshash_wrapped {
 			std::istringstream s(key);
 
 			s >> std::noskipws;
-
-			std::cout << "Hashing ###" << key << "###" << std::endl;
 
 			/**
 			 * Algo:
@@ -231,9 +227,7 @@ namespace dshash_wrapped {
 			int nchar = 0;
 			for (s >> c; s.good(); s >> c) {
 				if (nchar < 8) {
-					//std::cout << "c = " << c << std::endl;
 					x |= (low8_64(c) << (nchar++ << 3));
-					//std::cout << "x = " << x << std::endl;
 				} else {
 					// gathered 64 bits
 					xs[xsz++] = x;
