@@ -81,7 +81,7 @@ Given a fast universal hash function
 
 We can divide the input into chunks $X_0 \ldots X_j$, such that each $X_i$ contains $32$ integers of $64$ bits for $i<j$, and $X_j$ contains at most $32$ integers. Then apply $r$ to each $X_i$, $i=0\ldots j$, obtaining the sequence $\left(r(X_0), \ldots , r(X_j)\right)$. This sequence is a much shorter string, to which we can apply polynomial string hashing.
 
-As a fast universal hash function, we concatinate two versions, $r_1$ and $r_2$ of pair-multiply-shift:
+As a fast universal hash function, we concatenate two versions, $r_1$ and $r_2$ of pair-multiply-shift:
 \[r_1(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(a_{2i} + x_{2i})(a_{2i+1} + x_{2i+1}) \right)+b \right) [\bar{w}-l,\bar{w}]\]
 \[r_2(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(\alpha_{2i} + x_{2i})(\alpha_{2i+1} + x_{2i+1}) \right)+\beta \right) [\bar{w}-l,\bar{w}]\]
 Where $a_i,b_i,\alpha_i,\beta_i$ are random integers, and where $n[\bar{w}-l,\bar{w}]$ is the $l$ bit number consisting of bit $\bar{w}-l$ to bit $\bar{w}$ of the number $n$.
