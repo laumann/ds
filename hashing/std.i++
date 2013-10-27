@@ -3,5 +3,7 @@
 #endif
 
 #include <algorithm> // std::sort
+#include <cstring>
 
-using K = int;
+using Key = std::string; // <-- Not sure this one is necessary
+using Hash = std::hash<Key>;
