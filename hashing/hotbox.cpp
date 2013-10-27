@@ -109,11 +109,11 @@ int main(int argc, char** argv) {
 		delete set;
 	}
 
-	std::cout << std::setprecision(10) << std::fixed << std::endl << "Based on " << repetitions << " repetitions" << std::endl;
-	std::cout << "Size (bytes)  Time (seconds)" << std::endl;
+	std::cout << std::setprecision(10) << std::fixed << "Based on " << repetitions << " repetitions" << std::endl;
+	std::cout << "Size (bytes) \tTime (seconds)" << std::endl;
 	//for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
 	for (int i = 0; i < input.size(); i++) {
-		std::cout << input[i].size() << time_sums[i]/(double)repetitions << std::endl;
+		std::cout << input[i].size() << "\t\t" << time_sums[i]/(double)repetitions << std::endl;
 	}
 
 	return 0;
