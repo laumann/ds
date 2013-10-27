@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <sstream>
 
+#include "random-numbers-uint64.hpp"
+
 /**
  * Useful macros
  */
@@ -35,7 +37,7 @@
  *  - Proceed as normal
  */
 
-namespace dshash {
+namespace dshash_wrapped {
 
 	/**
 	 * Representation of a 96-bit number. We work in 89 bits, so the top 7 bits are
@@ -110,7 +112,7 @@ namespace dshash {
 		mults[1] = m64(a->high, b->mid);	// 2^96
 		mults[0] = m64(a->high, b->high);	// 2^128
 
-		for (int i = 0; i < 15; i++)	// Zero
+		for (unsigned i = 0; i < 15; i++)	// Zero
 			numbers[i].low = numbers[i].mid = numbers[i].high = 0;
 
 		numbers[0].low = low(mults[8]);
@@ -177,14 +179,29 @@ namespace dshash {
 	}
 
 	/**
+	 * A reduction algorithm
+	 */
+	uint32_t reduce(uint64_t *x[], size_t size) {
+		uint64_t res = 0;
+
+		for (unsigned i = 0; i < size; i++) {
+			res += (random_numbers[i<<1] + (*x)[i<<1]) * (random_numbers[(i<<1)+1] + (*x)[(i<<1)+1]);
+		}
+		res += random_numbers[32];
+
+		return high(res);
+	}
+
+
+	/**
 	 * A hasher. This is magic obtained from various sources including:
 	 *
-	 *  - http://mikecvet.wordpress.com/2011/01/28/customizing-tr1-unordered_map-hashing-and-equality-functions/
-	 *  - http://stackoverflow.com/questions/15809087/unordered-map-constructor-error-equal-to-templated-function
-	 *  - http://stackoverflow.com/questions/7222143/unordered-map-hash-function-c
+	 *
+	 * TODO Construct list of size max 32 of uint64_t, pass it to reduce
 	 */
 	struct hasher {
 		size_t operator () (const std::string& key) const {
+
 			std::istringstream s(key);
 
 			s >> std::noskipws;
@@ -227,4 +244,4 @@ namespace dshash {
 }
 
 using Key = std::string;
-using Hash = dshash::hasher;
+using Hash = dshash_wrapped::hasher;
