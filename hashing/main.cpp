@@ -3,6 +3,7 @@
 #include <fstream>
 #include <ctime>
 #include "dshash.hpp"
+#include "random-numbers.hpp"
 
 /**
  * Main function for our tiny hashing program. If there are no arguments it will
@@ -61,6 +62,12 @@ int main(int argc, char *argv[]) {
   	std::clock_t stop = std::clock();
   	double running_time = double(stop - start) / double(CLOCKS_PER_SEC);
 	std::cout << "Running time: " << running_time << std::endl;
+
+	for (int r = 0; r < N_RANDOM_NUMBERS; r++) {
+		print_number(&random_numbers[r]);
+		std::cout << std::endl;
+	}
+
 
 	in.close();
 	std::cout << "Number of iterations: " << i << std::endl;

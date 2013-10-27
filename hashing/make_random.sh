@@ -8,6 +8,7 @@ URL="http://www.random.org/integers/?num=264&min=0&max=65536&col=4&base=10&forma
 
 #NUMBERS="$(curl $URL)"
 NUMBERS=$(cat random.org)
+N=$(echo "$NUMBERS" | wc -l)
 
 #echo "$NUMBERS"
 
@@ -26,15 +27,19 @@ cat <<EOF > $RAND
 #define __RANDOM_NUMBERS
 
 #include "dshash.hpp"
-struct number random_numbers[66] = {
+
+#define N_RANDOM_NUMBERS $N
+
+struct number random_numbers[N_RANDOM_NUMBERS] = {
 EOF
+
 
 #static struct number a = { 0, ((uint32_t) 248421 << 16) | ((uint32_t) 17703), ((uint32_t) 367827 << 16) | ((uint32_t) 516523) };
 while read -r line; do
 	arr=(${line//\t/ })
 	#echo "1: echo ${arr[0]}, 2: ${arr[1]}, 3: ${arr[2]}, 4: ${arr[3]}"
 	cat <<EOF >> $RAND
-$TAB{ 0, ((uint32_t) ${arr[0]} << 16)$TAB| ((uint32_t) ${arr[1]}), ((uint32_t) ${arr[2]} << 16)$TAB| ((uint32_t) ${arr[3]}) },
+$TAB{ 0,$TAB((uint32_t) ${arr[0]} << 16) | ((uint32_t) ${arr[1]}),$TAB((uint32_t) ${arr[2]} << 16)| ((uint32_t) ${arr[3]})$TAB},
 EOF
 done <<< "$NUMBERS"
 

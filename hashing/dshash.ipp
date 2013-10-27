@@ -4,24 +4,24 @@
 #include <sstream>
 
 /**
- *  * Useful macros
- *   */
+ * Useful macros
+ */
 #define m64(x, y) (int64_t)x * (int64_t)y
 
 /**
- *  * Mask operations
- *   */
+ * Mask operations
+ */
 #define LOW_MASK (((uint64_t)1 << 32) - 1)
 
 /**
- *  * Extract the 32 highest bits of 64-bit number
- *   */
+ * Extract the 32 highest bits of 64-bit number
+ */
 #define high64(x) (x >> 32)
 #define high(x) ((uint32_t)high64(x))
 
 /**
- *  * Extract the 32 lowest bits of 64-bit number
- *   */
+ * Extract the 32 lowest bits of 64-bit number
+ */
 #define low64(x) (x & LOW_MASK)
 #define low(x) ((uint32_t)low64(x))
 
