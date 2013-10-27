@@ -6,8 +6,8 @@
 # Returns a list of 66 lines, each of which has four (random) numbers
 URL="http://www.random.org/integers/?num=264&min=0&max=65536&col=4&base=10&format=plain&rnd=new"
 
-#NUMBERS="$(curl $URL)"
-NUMBERS=$(cat random.org)
+NUMBERS="$(curl $URL)"
+#NUMBERS=$(cat random.org)
 N=$(echo "$NUMBERS" | wc -l)
 
 #echo "$NUMBERS"
