@@ -157,9 +157,19 @@ As noted before, we do not care about overflow, since we only will concern our s
 
 \paragraph{Wrapped Polynomial String Hashing}
 
-%TODO: Thomas?!
+As discussed above, the wrapped polynomial string hashing makes use of a
+reduction step, gathering 32 chunks of 64-bit numbers and reducing these to a
+single 32-bit number. The generated sequence of reduced (32-bit) numbers then
+becomes the input for the hashing function.
 
-While reading the input, each time we have $32$ of $64$-bit integers, we call the function $r$, which outputs $r(X_i)$. Then, the term $a^i \cdot r(X_i)$ is immediately computed, and the (intermediate) result is updated.
+The advantage of this reduction is two-fold: firstly our input string to hash
+becomes a lot shorter---as discussed above. Secondly, the reduction computation
+can be done completely in simple (64-bit) integers, discarding overflow, so we
+simply iterate over a list
+
+While reading the input, every time we have 32 $64$-bit integers, we call the function \funk{reduce}, which outputs $r(X_i)$. Then, the term $a^i \cdot r(X_i)$ is immediately computed, and the (intermediate) result is updated.
+
+%TODO: Thomas?!
 
 
 %\section{Unit testing}
@@ -170,9 +180,18 @@ While reading the input, each time we have $32$ of $64$-bit integers, we call th
 
 %We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
 
+\paragraph{Offline Version of Wrapped Polynomial String Hashing}
+
+Benchmarking indicated quite early after the the wrapped polynomial string hashing was implemented that it actually ran slower (or around the same speed) than the direct polynomial hashing. The comes as a bit of a surprise, although the actual hashing function has an added complexity to it. There is in the implementation a lot of state, for example a lot of switching on whether we are constructing $r_1(X_i)$ or $r_2(X_j)$, that is, the lower or upper half of the next 64-bit number.
+
+We therefore considered splitting the functionality into two separate phases, one that constructs $r(X_0),\dots,r(X_j)$, stored in a list, and then postpone the actual (89-bit modulo $p$) multiplications.
+
+This ``offline'' version achieves a next to nothing in terms of speed-up.
+
 \section{Experiment}
 First, we examine the time-performance of the direct polynomial string hashing. We expect the number of iterations to grow linearly with the file size, and thus the time to grow linearly as well.
 As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project. 
+
 
 \begin{figure}[H]
 \centering
