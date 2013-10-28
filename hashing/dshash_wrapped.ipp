@@ -231,13 +231,10 @@ namespace dshash_wrapped {
 				} else {
 					// gathered 64 bits
 					xs[xsz++] = x;
-					//std::cout << "Got number xs[" << xsz << "] = " << xs[xsz-1] << std::endl;
 					nchar = 0;
 					if (xsz == 32) {
 						uint32_t *np = high ? &n.mid : &n.low;
 						*np = reduce(xs, 32, high ? 0 : 32);
-						// put reduced value in low or high
-						// if high, then we have a full number and can do normal multiplication
 						if (high) {
 							multp(&ai, &a, &ai);
 							multp(&ai, &n, &prod);
@@ -273,7 +270,7 @@ namespace dshash_wrapped {
 				modp(&r);
 			}
 			multp(&r, &b, &r);
-			return n.low;
+			return r.low;
 		}
 	};
 }

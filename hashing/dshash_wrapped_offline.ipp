@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <sstream>
 
+#include "random-numbers-uint64.hpp"
+
 /**
  * Useful macros
  */
@@ -26,10 +28,13 @@
 #define low(x) ((uint32_t)low64(x))
 
 #define low8(c) ((uint32_t)c & ((1<<8)-1))
+#define low8_64(c)((uint64_t)c & ((1<<8)-1))
 
-
-
-namespace dshash {
+/**
+ *  Same algorithm as dshash_wrapped, but in an offline version that first
+ *  computes the foldings, and then computes the multiplications
+ */
+namespace dshash_wrapped_offline {
 
 	/**
 	 * Representation of a 96-bit number. We work in 89 bits, so the top 7 bits are
@@ -104,7 +109,7 @@ namespace dshash {
 		mults[1] = m64(a->high, b->mid);	// 2^96
 		mults[0] = m64(a->high, b->high);	// 2^128
 
-		for (int i = 0; i < 15; i++)	// Zero
+		for (unsigned i = 0; i < 15; i++)	// Zero
 			numbers[i].low = numbers[i].mid = numbers[i].high = 0;
 
 		numbers[0].low = low(mults[8]);
@@ -171,11 +176,25 @@ namespace dshash {
 	}
 
 	/**
+	 * A reduction algorithm
+	 */
+	uint32_t reduce(uint64_t *x, size_t size, size_t offset) {
+		uint64_t res = 0;
+
+		for (unsigned i = 0; i < size; i++) {
+			int sub1 = (i<<1)+offset;
+			int sub2 = sub1 + 1;
+			res += (dshash_wrapped::random_numbers[sub1] + x[sub1]) * (dshash_wrapped::random_numbers[sub2] + x[sub2]);
+		}
+		res += dshash_wrapped::random_numbers[32+offset];
+
+		return high(res);
+	}
+
+
+	/**
 	 * A hasher. This is magic obtained from various sources including:
 	 *
-	 *  - http://mikecvet.wordpress.com/2011/01/28/customizing-tr1-unordered_map-hashing-and-equality-functions/
-	 *  - http://stackoverflow.com/questions/15809087/unordered-map-constructor-error-equal-to-templated-function
-	 *  - http://stackoverflow.com/questions/7222143/unordered-map-hash-function-c
 	 */
 	struct hasher {
 		size_t operator () (const std::string& key) const {
@@ -183,42 +202,83 @@ namespace dshash {
 
 			s >> std::noskipws;
 
+			/**
+			 * Algo:
+			 *  - process the stream 8 bits at a time, gather 64 bit numbers
+			 *  - when full, call reduce(xs)
+			 *  - if 'high' then we have a new number we can multiply by
+			 */
+			uint64_t xs[32];
+			uint64_t x = 0;
+			size_t xsz = 0;
+			bool high = false;
+
 			char c;
+			std::vector<struct number *> reduced;
+			int redn = 0;
+
+			//int i = 0;
+			int nchar = 0;
+			for (s >> c; s.good(); s >> c) {
+				if (nchar < 8) {
+					x |= (low8_64(c) << (nchar++ << 3));
+				} else {
+					// gathered 64 bits
+					xs[xsz++] = x;
+					nchar = 0;
+					if (xsz == 32) {
+						if (high) {
+							reduced[redn++]->mid = reduce(xs, 32, 32);
+							high = false;
+						} else {
+							reduced.push_back((struct number *)malloc(sizeof(struct number)));
+							reduced[redn]->low = reduce(xs, 32, 0);
+							reduced[redn]->high = 0;
+							high = true;
+						}
+						xsz = 0;
+					}
+				}
+			}
+			/**
+			 * Identify if we need to add a remaining chunk
+			 */
+			if (xsz > 0) {
+				if (nchar < 8) {
+					xs[xsz++] = x;
+				}
+				reduced.push_back((struct number *)malloc(sizeof(struct number)));
+				reduced[redn]->high = 0;
+
+				if (high) {
+					reduced[redn]->mid = reduce(xs, xsz, 32);
+				} else {
+					reduced[redn]->mid = 0;
+					reduced[redn]->low = reduce(xs, xsz, 32);
+				}
+			}
+			
 			struct number n = { 0, 0, 0 };
 			struct number ai = { 0, 0, 1 };
 			struct number r = { 0, 0, 1 };
 			struct number prod = { 0, 0, 0 };
 
-			int i = 0;
-			int nchar = 0;
-			for (s >> c; s.good(); s >> c) {
-				if (nchar < 4)
-					n.low |= (low8(c)) << (nchar << 3);
-				else
-					n.mid |= (low8(c)) << ((nchar - 4) << 3);
-			
-				if (nchar == 8) {
-					multp(&ai, &a, &ai);
-					multp(&ai, &n, &prod);
-					add_to(&r, &prod);
 
-					if (!((++i & (1 << 6)) - 1))
-						modp(&r);
-					nchar = n.high = n.mid = n.low = 0;
-				}
-			}
-			if (nchar > 0) {
+			for (int i = 0; i < reduced.size(); i++) {
 				multp(&ai, &a, &ai);
-				multp(&ai, &n, &prod);
+				multp(&ai, reduced[i], &prod);
 				add_to(&r, &prod);
-				modp(&r);
+
+				if (!((i & (1 << 6)) - 1))
+					modp(&r);
 
 			}
-			multp(&r, &b, &r);
+			add_to(&r, &b);
+			modp(&r);
 			return r.low;
 		}
 	};
 }
 
 using Key = std::string;
-using Hash = dshash::hasher;
+using Hash = dshash_wrapped_offline::hasher;
