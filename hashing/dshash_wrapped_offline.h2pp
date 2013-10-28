@@ -1,0 +1,154 @@
+
+uint64_t random_numbers[66] = {
+	(uint64_t)35503 << 48	| (uint64_t)15738 << 32	| (uint64_t)65191 << 16	| (uint64_t)27603,
+	(uint64_t)45277 << 48	| (uint64_t)29846 << 32	| (uint64_t)64919 << 16	| (uint64_t)5567,
+	(uint64_t)28688 << 48	| (uint64_t)8161 << 32	| (uint64_t)13944 << 16	| (uint64_t)7840,
+	(uint64_t)36682 << 48	| (uint64_t)49255 << 32	| (uint64_t)55246 << 16	| (uint64_t)28946,
+	(uint64_t)51990 << 48	| (uint64_t)32694 << 32	| (uint64_t)42768 << 16	| (uint64_t)11537,
+	(uint64_t)24495 << 48	| (uint64_t)41126 << 32	| (uint64_t)35769 << 16	| (uint64_t)52161,
+	(uint64_t)59496 << 48	| (uint64_t)5748 << 32	| (uint64_t)57238 << 16	| (uint64_t)3280,
+	(uint64_t)10962 << 48	| (uint64_t)51404 << 32	| (uint64_t)201 << 16	| (uint64_t)52223,
+	(uint64_t)5150 << 48	| (uint64_t)46951 << 32	| (uint64_t)45749 << 16	| (uint64_t)26985,
+	(uint64_t)4686 << 48	| (uint64_t)53261 << 32	| (uint64_t)38914 << 16	| (uint64_t)44915,
+	(uint64_t)22420 << 48	| (uint64_t)12315 << 32	| (uint64_t)52095 << 16	| (uint64_t)61421,
+	(uint64_t)38399 << 48	| (uint64_t)30857 << 32	| (uint64_t)30489 << 16	| (uint64_t)61238,
+	(uint64_t)62753 << 48	| (uint64_t)15081 << 32	| (uint64_t)17905 << 16	| (uint64_t)11925,
+	(uint64_t)44107 << 48	| (uint64_t)12323 << 32	| (uint64_t)16450 << 16	| (uint64_t)6488,
+	(uint64_t)39444 << 48	| (uint64_t)59261 << 32	| (uint64_t)1563 << 16	| (uint64_t)61276,
+	(uint64_t)7258 << 48	| (uint64_t)5294 << 32	| (uint64_t)60610 << 16	| (uint64_t)33316,
+	(uint64_t)58893 << 48	| (uint64_t)55973 << 32	| (uint64_t)13648 << 16	| (uint64_t)62471,
+	(uint64_t)56884 << 48	| (uint64_t)19903 << 32	| (uint64_t)32849 << 16	| (uint64_t)51786,
+	(uint64_t)9806 << 48	| (uint64_t)13045 << 32	| (uint64_t)20372 << 16	| (uint64_t)5211,
+	(uint64_t)22227 << 48	| (uint64_t)64103 << 32	| (uint64_t)57223 << 16	| (uint64_t)18475,
+	(uint64_t)20310 << 48	| (uint64_t)17839 << 32	| (uint64_t)23108 << 16	| (uint64_t)27415,
+	(uint64_t)32818 << 48	| (uint64_t)3593 << 32	| (uint64_t)2608 << 16	| (uint64_t)28384,
+	(uint64_t)60456 << 48	| (uint64_t)19221 << 32	| (uint64_t)38644 << 16	| (uint64_t)39103,
+	(uint64_t)5151 << 48	| (uint64_t)17194 << 32	| (uint64_t)33873 << 16	| (uint64_t)47960,
+	(uint64_t)21755 << 48	| (uint64_t)37294 << 32	| (uint64_t)3256 << 16	| (uint64_t)14109,
+	(uint64_t)5493 << 48	| (uint64_t)13868 << 32	| (uint64_t)54100 << 16	| (uint64_t)5484,
+	(uint64_t)45641 << 48	| (uint64_t)55998 << 32	| (uint64_t)43825 << 16	| (uint64_t)23988,
+	(uint64_t)49107 << 48	| (uint64_t)57661 << 32	| (uint64_t)21660 << 16	| (uint64_t)41282,
+	(uint64_t)65218 << 48	| (uint64_t)58480 << 32	| (uint64_t)43239 << 16	| (uint64_t)45262,
+	(uint64_t)10777 << 48	| (uint64_t)50775 << 32	| (uint64_t)7728 << 16	| (uint64_t)51019,
+	(uint64_t)59431 << 48	| (uint64_t)21201 << 32	| (uint64_t)31122 << 16	| (uint64_t)29044,
+	(uint64_t)25516 << 48	| (uint64_t)19008 << 32	| (uint64_t)19144 << 16	| (uint64_t)19894,
+	(uint64_t)6076 << 48	| (uint64_t)26526 << 32	| (uint64_t)52163 << 16	| (uint64_t)34027,
+	(uint64_t)22632 << 48	| (uint64_t)30551 << 32	| (uint64_t)1528 << 16	| (uint64_t)60041,
+	(uint64_t)30709 << 48	| (uint64_t)28456 << 32	| (uint64_t)34406 << 16	| (uint64_t)53771,
+	(uint64_t)47461 << 48	| (uint64_t)54853 << 32	| (uint64_t)18078 << 16	| (uint64_t)21334,
+	(uint64_t)15557 << 48	| (uint64_t)4439 << 32	| (uint64_t)4459 << 16	| (uint64_t)5888,
+	(uint64_t)5103 << 48	| (uint64_t)29382 << 32	| (uint64_t)26937 << 16	| (uint64_t)63087,
+	(uint64_t)56975 << 48	| (uint64_t)20924 << 32	| (uint64_t)1532 << 16	| (uint64_t)13924,
+	(uint64_t)38257 << 48	| (uint64_t)42488 << 32	| (uint64_t)42302 << 16	| (uint64_t)45758,
+	(uint64_t)19075 << 48	| (uint64_t)37969 << 32	| (uint64_t)36985 << 16	| (uint64_t)8700,
+	(uint64_t)44574 << 48	| (uint64_t)42750 << 32	| (uint64_t)1133 << 16	| (uint64_t)41757,
+	(uint64_t)55929 << 48	| (uint64_t)22849 << 32	| (uint64_t)28575 << 16	| (uint64_t)57710,
+	(uint64_t)51804 << 48	| (uint64_t)28913 << 32	| (uint64_t)56239 << 16	| (uint64_t)10429,
+	(uint64_t)36533 << 48	| (uint64_t)22328 << 32	| (uint64_t)21163 << 16	| (uint64_t)62500,
+	(uint64_t)9245 << 48	| (uint64_t)20996 << 32	| (uint64_t)45971 << 16	| (uint64_t)11177,
+	(uint64_t)14046 << 48	| (uint64_t)42069 << 32	| (uint64_t)49545 << 16	| (uint64_t)40943,
+	(uint64_t)47945 << 48	| (uint64_t)51709 << 32	| (uint64_t)61206 << 16	| (uint64_t)9849,
+	(uint64_t)9395 << 48	| (uint64_t)10834 << 32	| (uint64_t)918 << 16	| (uint64_t)4587,
+	(uint64_t)48639 << 48	| (uint64_t)60558 << 32	| (uint64_t)37697 << 16	| (uint64_t)6251,
+	(uint64_t)14481 << 48	| (uint64_t)29122 << 32	| (uint64_t)42217 << 16	| (uint64_t)18838,
+	(uint64_t)62117 << 48	| (uint64_t)64709 << 32	| (uint64_t)31102 << 16	| (uint64_t)64139,
+	(uint64_t)36681 << 48	| (uint64_t)24775 << 32	| (uint64_t)46183 << 16	| (uint64_t)48566,
+	(uint64_t)11621 << 48	| (uint64_t)1211 << 32	| (uint64_t)62012 << 16	| (uint64_t)38281,
+	(uint64_t)15319 << 48	| (uint64_t)41524 << 32	| (uint64_t)36844 << 16	| (uint64_t)5527,
+	(uint64_t)24122 << 48	| (uint64_t)10371 << 32	| (uint64_t)41491 << 16	| (uint64_t)9496,
+	(uint64_t)42037 << 48	| (uint64_t)38925 << 32	| (uint64_t)28950 << 16	| (uint64_t)32247,
+	(uint64_t)40926 << 48	| (uint64_t)48580 << 32	| (uint64_t)3621 << 16	| (uint64_t)22914,
+	(uint64_t)46674 << 48	| (uint64_t)31320 << 32	| (uint64_t)47300 << 16	| (uint64_t)798,
+	(uint64_t)61569 << 48	| (uint64_t)17843 << 32	| (uint64_t)32928 << 16	| (uint64_t)8352,
+	(uint64_t)35358 << 48	| (uint64_t)17541 << 32	| (uint64_t)4537 << 16	| (uint64_t)34924,
+	(uint64_t)10444 << 48	| (uint64_t)22718 << 32	| (uint64_t)660 << 16	| (uint64_t)44677,
+	(uint64_t)46757 << 48	| (uint64_t)64844 << 32	| (uint64_t)3055 << 16	| (uint64_t)9591,
+	(uint64_t)60185 << 48	| (uint64_t)48826 << 32	| (uint64_t)8168 << 16	| (uint64_t)25206,
+	(uint64_t)48778 << 48	| (uint64_t)44375 << 32	| (uint64_t)57198 << 16	| (uint64_t)45014,
+	(uint64_t)51256 << 48	| (uint64_t)57032 << 32	| (uint64_t)12271 << 16	| (uint64_t)45619,
+};
+
+/**
+ * A reduction algorithm
+ */
+uint32_t reduce(uint64_t *x, size_t size, size_t offset) {
+	uint64_t res = 0;
+	for (unsigned i = 0; i < size; i++) {
+		int sub1 = (i<<1)+offset;
+		int sub2 = sub1 + 1;
+		res += (random_numbers[sub1] + x[sub1]) * (random_numbers[sub2] + x[sub2]);
+	}
+	res += random_numbers[32+offset];
+	return high(res);
+}
+
+
+/**
+ */
+uint32_t hashfoo(std::ifstream& s) {
+	uint64_t xs[32];
+	uint64_t x = 0;
+	size_t xsz = 0;
+	bool high = false;
+
+	char c;
+	std::vector<struct number *> reduced;
+	int redn = 0;
+
+	//int i = 0;
+	int nchar = 0;
+	for (s >> c; s.good(); s >> c) {
+		if (nchar < 8) {
+			x |= (low8_64(c) << (nchar++ << 3));
+		} else {
+			// gathered 64 bits
+			xs[xsz++] = x;
+			nchar = 0;
+			if (xsz == 32) {
+				if (high) {
+					reduced[redn++]->mid = reduce(xs, 32, 32);
+					high = false;
+				} else {
+					reduced.push_back((struct number *)malloc(sizeof(struct number)));
+					reduced[redn]->low = reduce(xs, 32, 0);
+					reduced[redn]->high = 0;
+					high = true;
+				}
+				xsz = 0;
+			}
+		}
+	}
+	/**
+	 * Identify if we need to add a remaining chunk
+	 */
+	if (xsz > 0) {
+		if (nchar < 8) {
+			xs[xsz++] = x;
+		}
+		reduced.push_back((struct number *)malloc(sizeof(struct number)));
+		reduced[redn]->high = 0;
+		if (high) {
+			reduced[redn]->mid = reduce(xs, xsz, 32);
+		} else {
+			reduced[redn]->mid = 0;
+			reduced[redn]->low = reduce(xs, xsz, 32);
+		}
+	}
+			
+	struct number ai = { 0, 0, 1 };
+	struct number r = { 0, 0, 1 };
+	struct number prod = { 0, 0, 0 };
+
+
+	for (unsigned i = 0; i < reduced.size(); i++) {
+		multp(&ai, &a, &ai);
+		multp(&ai, reduced[i], &prod);
+		add_to(&r, &prod);
+		if (!((i & (1 << 6)) - 1))
+			modp(&r);
+	}
+	add_to(&r, &b);
+	modp(&r);
+	return r.low;
+
+}

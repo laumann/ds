@@ -6,6 +6,11 @@ hash-bases:= $(basename $(hash-algorithms))
 hash:= $(addsuffix .hash, $(hash-bases))
 comp:= $(addsuffix .compile, $(hash-bases))
 
+hash2-algorithms:= $(wildcard *.h2pp)
+hash2-bases:= $(basename $(hash2-algorithms))
+hash2comp:= $(addsuffix .comp, $(hash2-bases))
+
+
 N = 1024 2048 4096 8192 16384 32768 65536 131072 262144 524288 1048576 #2097152 4194304 8388608 16777216 33554432
 
 OBJS=dshash.o
@@ -23,6 +28,9 @@ dshash: $(OBJS) $(HDRS)
 dshash_test: $(TEST_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_OBJS) -o $@
 
+$(hash2comp): %.comp : %.h2pp
+	@cp $*.h2pp hash.h2pp
+	$(CXX) $(CXXFLAGS) main2.cpp dshash.cpp -o $@
 
 $(comp): %.compile : %.ipp
 	@cp $*.ipp hash.ipp

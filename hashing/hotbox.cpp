@@ -28,27 +28,6 @@ void usage(int argc, char *argv[]) {
 	exit(0);
 }
 
-/**
- * Reads a file, and for each line, treats the text as the (relative) path to a
- * text file to hash.
- */
-void get_file_contents(const char *filename, std::string *dest) {
-	std::ifstream in(filename, std::ios::in);
-	if (in) {
-		//std::string contents;
-		in.seekg(0, std::ios::end);
-		dest->resize(in.tellg());
-		//contents.resize(in.tellg());
-		in.read(&(*dest)[0], dest->size());
-		//in.read(&contents[0], contents.size());
-		std::cout << *dest << std::endl;
-		in.close();
-		return;
-		//return contents;
-	}
-	throw errno;
-}
-
 int main(int argc, char** argv) {
 
 	if (argc < 2)
@@ -96,10 +75,7 @@ int main(int argc, char** argv) {
 
 		for (uint32_t j = 0; j < input.size(); j++) {
 			start = std::clock();
-
 			set->insert(input[j]);
-			//set->find(input[j]);
-
 			stop = std::clock();
 			
 			// Add insertion time to correct index
@@ -110,9 +86,8 @@ int main(int argc, char** argv) {
 	}
 
 	std::cout << std::setprecision(10) << std::fixed << "Based on " << repetitions << " repetitions" << std::endl;
-	std::cout << "Size (bytes) \tTime (seconds)" << std::endl;
-	//for (std::vector<double>::iterator it = time_sums.begin(); it != time_sums.end(); it++) {
-	for (int i = 0; i < input.size(); i++) {
+	std::cout << "Size\t\tTime (seconds)" << std::endl;
+	for (unsigned i = 0; i < input.size(); i++) {
 		std::cout << input[i].size() << "\t\t" << time_sums[i]/(double)repetitions << std::endl;
 	}
 

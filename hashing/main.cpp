@@ -3,7 +3,6 @@
 #include <fstream>
 #include <ctime>
 #include "dshash.hpp"
-#include "random-numbers.hpp"
 
 /**
  * Main function for our tiny hashing program. If there are no arguments it will
@@ -39,15 +38,7 @@ int main(int argc, char *argv[]) {
 	struct number r = {0, 0, 1};
 	struct number prod = {0, 0, 0};
 
-	/*
-	print_number(&a);
-	std::cout << std::endl;
-
-	print_number(&b);
-	std::cout << std::endl;
-	*/
-
-	int i =0;
+	int i = 0;
   	std::clock_t start = std::clock();
 	for (in >> c; in.good(); in >> c) {
 		n.low = (uint32_t)c;
@@ -62,11 +53,6 @@ int main(int argc, char *argv[]) {
   	std::clock_t stop = std::clock();
   	double running_time = double(stop - start) / double(CLOCKS_PER_SEC);
 	std::cout << "Running time: " << running_time << std::endl;
-
-	for (int r = 0; r < N_RANDOM_NUMBERS; r++) {
-		print_number(&random_numbers[r]);
-		std::cout << std::endl;
-	}
 
 
 	in.close();

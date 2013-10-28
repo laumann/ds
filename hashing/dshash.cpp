@@ -161,42 +161,4 @@ void multp(struct number *a, struct number *b, struct number *result) {
 	modp(result);
 }
 
-/*
-void test_add() {
-	struct number n1 = {0, 0, 21};
-	struct number n2 = {0, 0, 21};
-
-	print_number(&n1);
-	std::cout << std::endl;
-	print_number(&n2);
-	std::cout << std::endl;
-	
-	add_to(&n1, &n2);
-	
-	print_number(&n1);
-	std::cout << std::endl;
-}
-*/
-
-#define array_size(x) (sizeof(x)/sizeof(x[0]))
-
-/*
-uint32_t hash(struct number *a, struct number *b, struct number x[]) {
-	
-	struct number ai = {0, 0, 1};
-	struct number r = {0, 0, 0};
-	struct number prod = {0, 0, 0};
-	
-	for (int i = 0; i < array_size(x); i++) {
-		multp(&ai, a, &ai);
-		multp(&ai, &x[i], &prod);
-		add_to(&r, &prod);
-		
-		if (!((i & (1 << 6)) - 1))
-			modp(&r);
-	}
-	multp(&r, b, &r);
-	return r.low;
-}
-*/
 
