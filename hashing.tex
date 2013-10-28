@@ -1,22 +1,3 @@
-\documentclass[]{article}
-
-\usepackage{graphicx}
-\usepackage{float}
-
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{xspace}
-
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{note}[theorem]{Note}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-
-\newenvironment{definition}[1][Definition]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 \newenvironment{example}[1][Example]{\begin{trivlist}
 \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 \newenvironment{remark}[1][Remark]{\begin{trivlist}
@@ -33,6 +14,15 @@
 
 \begin{document}
 \maketitle
+
+We use polynomial string hashing to obtain universal hashing of strings of variable length.
+
+For fixed length strings, some very fast hashing functions exist, but for variable length strings, so far no version of "multiply shift" has been developed. 
+
+However, one can divide the string into chunks of fixed length, use a very fast hashing function on each chunk, and apply the universal hashing function on the result, which again has variable length. We call this "wrapped polynomial string hashing" as opposed to "direct polynomial string hashing".
+
+The obtained result is a fast \emph{universal hash-function} for strings of unbounded length. %, which performs better in practice than the standard library implementation. 
+%TODO: Bedre end std lib?
 
 \section{Theory}
 
@@ -85,7 +75,9 @@ We can divide the input into chunks $X_0 \ldots X_j$, such that each $X_i$ conta
 As a fast universal hash function, we concatenate two versions, $r_1$ and $r_2$ of pair-multiply-shift:
 \[r_1(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(a_{2i} + x_{2i})(a_{2i+1} + x_{2i+1}) \right)+b \right) [\bar{w}-l,\bar{w}]\]
 \[r_2(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(\alpha_{2i} + x_{2i})(\alpha_{2i+1} + x_{2i+1}) \right)+\beta \right) [\bar{w}-l,\bar{w}]\]
-Where $a_i,b_i,\alpha_i,\beta_i$ are random integers, and where $n[\bar{w}-l,\bar{w}]$ is the $l$ bit number consisting of bit $\bar{w}-l$ to bit $\bar{w}$ of the number $n$.
+Where $a_i,b_i,\alpha_i,\beta_i$ are random $\bar{w}$-bit integers, and where $n[\bar{w}-l,\bar{w}]$ is the $l$ bit number consisting of bit $\bar{w}-l$ to bit $\bar{w}$ of the number $n$.
+
+Setting $l = 32$ and having $d\leq 32$, we can use $\bar{w} = 64$, and let $x_i,a_i,b$ be $64$-bit integers. Since we discard everything above $\bar{w}$, that simply means we perform carriless multiplication and addition, since it corresponds to operating within $\mathbb{Z}/2^{64}$. With these values of $\bar{w}$ and $l$, the result will be a $32$-bit integer. Concatenating two universal $32$-bit integer functions yields a universal $64$-bit integer function, that is, $r: [2^{64}]^d \to [2^{64}]$
 
 \section{Implementation}
 
@@ -109,18 +101,51 @@ The function \funk{multp(a, b, res)} implements the multiplication of two 89-bit
 
 Doing modulo $m$ when $m = 32$ simply implies returning \funk{n.low}
 
-\paragraph{Direct PSH}
+\paragraph{Direct Polynomial String Hashing}
 
 The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed.
 
-\paragraph{Pair-multiply-shift}
-\paragraph{Wrapped PSH}
+\paragraph{Pair-multiply-shift} 
 
-\section{Unit testing}
+We generate the random integers we need by calling \texttt{random.org}. 
 
-\paragraph{Multiply mod $p = 2^{81} -1$.} To test correctness of out mod-$p$-multiplier, we multiply two random numbers $a,b$ using a black-box multiplication function we assume to work obtaining the product $a*b$. Then we calculate our mod-$p$ product, $a\cdot b$. If the difference is divisible by $p$, we are happy. We calculate: 
-$$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
-%TODO: Actually perform this unit test!
+In pseudo code, for initialisation, we do the following:
+
+\begin{verbatim}
+for(i = 0; i<66; i++){
+    randoms[i] <- random uint64
+}
+\end{verbatim}
+
+The randoms $0\ldots 31$ correspond to $a_i$, then randoms no. $32$ is our b, and in the same way the last ones are $\alpha_i$ and $\beta$.
+
+To compute the hash-value, we do the following:
+\begin{verbatim}
+res = 0
+b = randoms[32]
+for(i = 0; i < 16; i++){
+    // never mind overflow
+    res = res + (randoms[2i] + x[2i])*(randoms[2i+1] + x[2i+1])
+}
+res = res + b
+return high(res);
+\end{verbatim}
+
+Where the function \texttt{high} returns the most significant $32$ bits of a $64$-bit number.
+As noted before, we do not care about overflow, since we only will concern our selves with the $64$ least significant bits of the sum.
+
+\paragraph{Wrapped Polynomial String Hashing}
+
+%TODO: Thomas?!
+
+While reading the input, each time we have $32$ of $64$-bit integers, we call the function $r$, which outputs $r(X_i)$. Then, the term $a^i \cdot r(X_i)$ is immediately computed, and the (intermediate) result is updated.
+
+
+%\section{Unit testing}
+
+%\paragraph{Multiply mod $p = 2^{81} -1$.} To test correctness of out mod-$p$-multiplier, we multiply two random numbers $a,b$ using a black-box multiplication function we assume to work obtaining the product $a*b$. Then we calculate our mod-$p$ product, $a\cdot b$. If the difference is divisible by $p$, we are happy. We calculate: 
+%$$\left((a*b - a\cdot b)\mod p\right) ~ \stackrel{?}{=} ~ 0.$$
+%%TODO: Actually perform this unit test!
 
 %We test several cases: a $32$-bit number with a $32$-bit number, with and without over flow; a $32$-bit number with a $64$-bit number, 
 
