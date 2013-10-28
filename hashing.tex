@@ -96,7 +96,9 @@ As a fast universal hash function, we concatenate two versions, $r_1$ and $r_2$ 
 \[r_2(x_0,\ldots ,x_{d-1}) = \left(\left(\sum_{i\in [d/2]}(\alpha_{2i} + x_{2i})(\alpha_{2i+1} + x_{2i+1}) \right)+\beta \right) [\bar{w}-l,\bar{w}]\]
 Where $a_i,b_i,\alpha_i,\beta_i$ are random $\bar{w}$-bit integers, and where $n[\bar{w}-l,\bar{w}]$ is the $l$ bit number consisting of bit $\bar{w}-l$ to bit $\bar{w}$ of the number $n$.
 
-Setting $l = 32$ and having $d\leq 32$, we can use $\bar{w} = 64$, and let $x_i,a_i,b$ be $64$-bit integers. Since we discard everything above $\bar{w}$, that simply means we perform carriless multiplication and addition, since it corresponds to operating within $\mathbb{Z}/2^{64}$. With these values of $\bar{w}$ and $l$, the result will be a $32$-bit integer. Concatenating two universal $32$-bit integer functions yields a universal $64$-bit integer function, that is, $r: [2^{64}]^d \to [2^{64}]$
+Setting $l = 32$ and having $d\leq 32$, we can use $\bar{w} = 64$, and let $x_i,a_i,b$ be $64$-bit integers. Since we discard everything above $\bar{w}$, that simply means we perform carriless multiplication and addition, since it corresponds to operating within $\mathbb{Z}/2^{64}$. With these values of $\bar{w}$ and $l$, the result will be a $32$-bit integer. Concatenating two universal $32$-bit integer functions yields a universal $64$-bit integer function, that is, $r: [2^{64}]^d \to [2^{64}]$.
+
+\paragraph{Comparison to direct polynomial string hashing.} Theoretically, the improvement is substantial. The number of multiplications per $32\cdot 64$-bit chunk is now $16$, for the pair-mult-shift, plus $9$, for one iteration of polynomial string hashing. A total of $25$ multiplications (of $64$-bit numbers). With direct PSH, the number of multiplications would be $9\cdot 32 = 288$. That is a factor of $10$ improvement in the number of multiplications.
 
 \section{Implementation}
 
