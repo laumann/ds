@@ -69,7 +69,7 @@ res = res mod p
 
 As earlier noted, we can use the congruence $x \equiv x\mod 2^q + \lfloor x / 2^q \rfloor$, to make quicker calculations modulo a Mersenne prime, $2^q -1$.
 
-In order to multiply $>32$ bit numbers, in fact several multiplications are needed. When multiplying two circa $89$ bit numbers, we split each number into two parts: $a = a_2\cdot 2^{64} + a_1 \cdot 2^{32} + a_0$, and similarly, $y = y_2\cdot y^{64} + y_1 \cdot 2^{32} + y_0$, where $a_i$ and $y_j$ are all $32$-bit numbers. Then, we calculate all the multiplications $a_i y_j$. To find the mod p value of $ay$, we analyse each summand, which is on the form $a_i y_j \cdot 2^{k}$, where $a_i y_j$ is a $64$ bit number. Using the congruence above, when $k>q$, we do not need to add the first summand $a_i y_j \cdot 2^k \mod 2^q = 0$, and need only add $a_i y_j \cdot 2^{k-q}$. Symmetrically, $a_0 y_0$ only contributes with the first summand, as $a_0 y_0 < 2^q$. For $k<q$ we have the equivalence $a_i y_j 2^k \equiv (a_i y-_j \mod 2^{q-k})\cdot 2^k + a_i y_j / 2^{q-k}$.
+In order to multiply $>32$ bit numbers, in fact several multiplications are needed. When multiplying two circa $89$ bit numbers, we split each number into three parts: $a = a_2\cdot 2^{64} + a_1 \cdot 2^{32} + a_0$, and similarly, $y = y_2\cdot y^{64} + y_1 \cdot 2^{32} + y_0$, where $a_i$ and $y_j$ are all $32$-bit numbers. Then, we calculate all the multiplications $a_i y_j$. To find the mod $p$ value of $ay$, we analyse each summand, which is on the form $a_i y_j \cdot 2^{k}$, where $a_i y_j$ is a $64$ bit number. Using the congruence above, when $k>q$, we do not need to add the first summand $a_i y_j \cdot 2^k \mod 2^q = 0$, and need only add $a_i y_j \cdot 2^{k-q}$. Symmetrically, $a_0 y_0$ only contributes with the first summand, as $a_0 y_0 < 2^q$. For $k<q$ we have the equivalence $a_i y_j 2^k \equiv (a_i y-_j \mod 2^{q-k})\cdot 2^k + a_i y_j / 2^{q-k}$.
 
 \[\begin{matrix}
 & & (a_2 2^{64} + a_1 2^{32} + a_0)\cdot (y_2 2^{} + y_1 2^{32} + y_0) \\
@@ -118,14 +118,13 @@ struct number {
 
 We implement addition, modulo $p$ and multiplication modulo $p$ for the number \funk{struct}s. Both \funk{add\_to(a, b)} and \funk{modp(a)} modify their first argument.
 
-The function \funk{multp(a, b, res)} implements the multiplication of two 89-bit numbers modulo $p$, placing the result in the third variable \funk{res}.
+The function \funk{multp(a, b, r)} implements the multiplication of two 89-bit numbers modulo $p$, placing the result in the third variable \funk{r}.
 
 Doing modulo $m$ when $m = 32$ simply implies returning \funk{n.low}
 
 \paragraph{Direct Polynomial String Hashing}
 
-The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed.
-
+The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed. The implementation is an ``online'' version that updates the current result when a new $x_i$ has been found.
 \paragraph{Pair-multiply-shift} 
 
 We generate the random integers we need by calling \texttt{random.org}. 
@@ -165,9 +164,9 @@ becomes the input for the hashing function.
 The advantage of this reduction is two-fold: firstly our input string to hash
 becomes a lot shorter---as discussed above. Secondly, the reduction computation
 can be done completely in simple (64-bit) integers, discarding overflow, so we
-simply iterate over a list
+simply iterate over a list of \funk{uint64\_t}s and implement the pseudo-code more or less verbatim.
 
-While reading the input, every time we have 32 $64$-bit integers, we call the function \funk{reduce}, which outputs $r(X_i)$. Then, the term $a^i \cdot r(X_i)$ is immediately computed, and the (intermediate) result is updated.
+While reading the input, every time we have 32 $64$-bit integers, we call the function \funk{reduce}, which outputs $r(X_i)$. For every two such reductions, a new 64-bit number is formed, $y = r_2(X_{i+1})r_1(X_i)$ and the term $a^i \cdot y$ is immediately computed, and the (intermediate) result is updated.
 
 %TODO: Thomas?!
 
@@ -190,19 +189,25 @@ This ``offline'' version achieves a next to nothing in terms of speed-up.
 
 \section{Experiment}
 First, we examine the time-performance of the direct polynomial string hashing. We expect the number of iterations to grow linearly with the file size, and thus the time to grow linearly as well.
-As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project. 
+As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project.
+
+The experiments were carried out on a Intel Core i5 processor 3.1 GHz with 4 cores, and 8GB RAM.
+
+Initially, we compared the PSH against the \cpp STL \funk{unordered\_set}, in which we discovered that PSH runs approximately 30 times slower compared to the STL hasher. The comparison was made using a driver framework similar in style to the code provided in the assignments (using Makefile tricks). This framework allowed us to focus only on the hash function and keeping the underlying framework unchanged. Ideally this should give a fairer basis of comparison for the hash functions. In order to accomodate STL, for each book the entire text was read into a string and then the string was stored in an \funk{unordered\_set} whose hash function had been fixed at compilation time (either \funk{std::hash<Key>} or our \funk{dshash::hash<Key>}. Reading a whole file into memory may not be a good idea, but for the conditions being equal across the tests it doesn't really matter how badly this aspect performs.
+
+As mentioned we found our implementation to be quite a bit slower than \funk{std::hash}, consistently close to 30 times slower than that of STL. We believe this is due to our implementation being more elaborate, and possibly doing something unfortunate in terms of execution, possibly causing a lot of cache misses or flushes and not gaining any advantage. The actual hash function used in \funk{std::hash} has not been accessible to us (or we have simply not been successful at finding it), so directly inspecting its code to get an idea of why the differences are so large has not been possible.
+
+Implementing the ``wrapping'' to reduce the size of the hashed string (and the number of multiplications) were done using the same setup, but yielded no improvements.
+
+We hypothesize that several factors could contribute to our results: (1) our implementation is sub-optimal or (2) the STL framework doesn't play well with our implementation.
+
+In light of the above mentioned factors we decided to abandon this comparison and focus on the sought speed gain, by ``wrapping'' the input before hashing (WPSH). Furthermore we took our hash function implementation out of the STL framework and implemented another testing framework in which the only gap to be filled is a hash function, given an input stream \funk{std::ifstream} and outputting a 32-bit integer.
 
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\linewidth]{./directPoly}
-\caption{Time consumption as a function of file-size for Direct PSH.}
-\label{fig:directPoly}
-\end{figure}
 
-We compare our function with the \cpp standard library (\funk{unordered\_set}). %As objects we have downloaded books in different languages from The Gutenberg Project.
+%We compare our function with the \cpp standard library (\funk{unordered\_set}). %As objects we have downloaded books in different languages from The Gutenberg Project.
 
-The experimentation can be performed in various ways. We could opt to implement a complete stand-alone hash table, or attempt to conform to the \funk{Hash} type. We decided to conform to the \funk{Hash} type, to reduce variability, and to make a more fair comparison between the two hash-functions.
+%The experimentation can be performed in various ways. We could opt to implement a complete stand-alone hash table, or attempt to conform to the \funk{Hash} type. We decided to conform to the \funk{Hash} type, to reduce variability, and to make a more fair comparison between the two hash-functions.
 
 
 
