@@ -236,7 +236,7 @@ As objects to be hashed, we have downloaded books in different languages from Th
 
 The experiments were carried out on a Intel Core i5 processor 3.1 GHz with 4 cores, and 8GB RAM.
 
-We developed a testing framework in which we could supply a hashing function to an \funk{unordered\_set}, which then for a given number of repetitions, hashed the full text of the books. Embedding our function into the STL framework allows to compare our result to the hash function employed by the \cpp STL and with some confidence argue that any differences observed are due to the hash function in place. This is apparent, because everything else surrounding the tests are fixed.
+We developed a testing framework in which we could supply a hashing function to an \funk{unordered\_set}, which then for a given number of repetitions, hashed the full text of the books. Embedding our function into the STL framework allows to compare our result to the hash function employed by the \cpp STL and with some confidence argue that any differences observed are due to the hash function in place and not because of differences in the surrounding infrastructure. 
 
 We initially avoided implementing our hash table, as we perceived it secondary to actually implementing the hash functions.
 
@@ -246,7 +246,9 @@ The script \funk{regen-logs.sh} is provided, which compiles all three test imple
 
 Our first attempt showed our hash function implementation to run close to 30 times slower than \cpp STL! This was a huge surprise as we had expected at least something comparable. For a long time we struggled with trying to figure out where the bottleneck was. The underlying problem is obviously (to us) that none of us are experienced \cpp programmers and had to gather knowledge along the way.
 
-In light of the above mentioned factors we decided to abandon this comparison and focus on the sought speed gain, by ``wrapping'' the input before hashing (WPSH). Furthermore we took our hash function implementation out of the STL framework and implemented another testing framework in which the only gap to be filled is a hash function, given an input stream \funk{std::ifstream} and outputting a 32-bit integer.
+In light of this we decided to abandon this comparison and focus on the sought speed gain, by ``wrapping'' the input before hashing (WPSH). Furthermore we took our hash function implementation out of the STL framework and implemented another testing framework in which the only gap to be filled is a hash function, given an input stream \funk{std::ifstream} and outputting a 32-bit integer.
+
+This approach did not show any improvements when comparing the direct and wrapped polynomial string hashing. Even the proposed offline version of the wrapped PSH did not produce anything useful.
 
 %Initially, we compared the PSH against the \cpp STL \funk{unordered\_set}, in which we discovered that PSH runs approximately 30 times slower compared to the STL hasher. The comparison was made using a driver framework similar in style to the code provided in the assignments (using Makefile tricks). This framework allowed us to focus only on the hash function and keeping the underlying framework unchanged. Ideally this should give a fairer basis of comparison for the hash functions. In order to accomodate STL, for each book the entire text was read into a string and then the string was stored in an \funk{unordered\_set} whose hash function had been fixed at compilation time (either \funk{std::hash<Key>} or our \funk{dshash::hash<Key>}. Reading a whole file into memory may not be a good idea, but for the conditions being equal across the tests it doesn't really matter how badly this aspect performs.
 
@@ -272,7 +274,7 @@ In light of the above mentioned factors we decided to abandon this comparison an
 	\label{fig:hashcmp}
 \end{figure}
 
-Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka . %TODO: hvad er speedup?
+%Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka 40\%
 
 \paragraph{Gaining speed}
 
@@ -281,7 +283,7 @@ Going back to the drawing board, we discovered several (minor) mistakes and two 
 \item we hadn't implemented the speed-up using the recurrence described in the notes; and
 \item we had been reading 8 bits at a time from an input stream, concatenating eight of these into a 64-bit chunk, where one can just exchange \funk{char} with \funk{uint64\_t} to read 64 bits at a time.
 \end{inparaenum}
-These changes combined produced the results seen in Figure~\ref{fig:hashcmp}, suddenly yielding a significant speed-up compared to the STL implementation.
+These changes combined produced the results seen in Figure~\ref{fig:hashcmp}, suddenly yielding a significant speed-up compared to the STL implementation. In relation to the STL our implementation achieves a speed-up of circa 40\%. Surprisingly, again, as with our first implementation, the wrapped PSH does not perform any better than the direct PSH.
 
 \section{Conclusions and Future Work}
 
@@ -292,6 +294,8 @@ It is also likely that we inadvertently cause a lot of cache misses and flushes,
 One optimisation we discussed, but decided to omit for the moment, is to inline the reduction step in the hashing function, so instead of copying 32 64-bit integers into an array and then process it we compute the reduction online, directly on the input stream. This would avoid unnecessary copying.
 
 Another optimization we attempted in our despair of a very slow algorithm was an offline version of the wrapped PSH, where the reductions would first be computed in its own phase, and a subsequent phase would then perform the multiplications. Experimentally we saw no real improvement, but this was before we discovered our own inefficiency mistakes.
+
+As described earlier we focused on implementing the hash functions, rather than build an STL compatible hash table. The next step in would obviously be to develop the structures for \funk{unordered\_set}, \funk{unordered\_map}, \funk{unordered\_multiset} and \funk{unordered\_multimap}, and benchmark these against the STL implementation. This should be straight-forward though, given that the hash function is in place.
 
 %An optimization that could be considered for the implementation of (offline) WPSH, would be to inline the reduction logic in the hashing function, instead of gathering a list of 64-bit integers. Then the reduction could work directly on the input stream, avoiding unnecessary copying and branching.
 
