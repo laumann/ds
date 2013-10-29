@@ -2,13 +2,13 @@
 
 \usepackage{graphicx}
 \usepackage{float}
-
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{xspace}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{paralist}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
@@ -232,19 +232,30 @@ We therefore considered splitting the functionality into two separate phases, on
 
 \section{Experiment}
 First, we examine the time-performance of the direct polynomial string hashing. We expect the number of iterations to grow linearly with the file size, and thus the time to grow linearly as well.
-As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project.
+As objects to be hashed, we have downloaded books in different languages from The Gutenberg Project. These can be found in the \funk{books} directory.
 
 The experiments were carried out on a Intel Core i5 processor 3.1 GHz with 4 cores, and 8GB RAM.
 
-Initially, we compared the PSH against the \cpp STL \funk{unordered\_set}, in which we discovered that PSH runs approximately 30 times slower compared to the STL hasher. The comparison was made using a driver framework similar in style to the code provided in the assignments (using Makefile tricks). This framework allowed us to focus only on the hash function and keeping the underlying framework unchanged. Ideally this should give a fairer basis of comparison for the hash functions. In order to accomodate STL, for each book the entire text was read into a string and then the string was stored in an \funk{unordered\_set} whose hash function had been fixed at compilation time (either \funk{std::hash<Key>} or our \funk{dshash::hash<Key>}. Reading a whole file into memory may not be a good idea, but for the conditions being equal across the tests it doesn't really matter how badly this aspect performs.
+We developed a testing framework in which we could supply a hashing function to an \funk{unordered\_set}, which then for a given number of repetitions, hashed the full text of the books. Embedding our function into the STL framework allows to compare our result to the hash function employed by the \cpp STL and with some confidence argue that any differences observed are due to the hash function in place. This is apparent, because everything else surrounding the tests are fixed.
 
-As mentioned we found our implementation to be quite a bit slower than \funk{std::hash}, consistently close to 30 times slower than that of STL. We believe this is due to our implementation being more elaborate, and possibly doing something unfortunate in terms of execution, possibly causing a lot of cache misses or flushes and not gaining any advantage. The actual hash function used in \funk{std::hash} has not been accessible to us (or we have simply not been successful at finding it), so directly inspecting its code to get an idea of why the differences are so large has not been possible.
+We initially avoided implementing our hash table, as we perceived it secondary to actually implementing the hash functions.
 
-Implementing the ``wrapping'' to reduce the size of the hashed string (and the number of multiplications) were done using the same setup, but yielded no improvements.
+The script \funk{regen-logs.sh} is provided, which compiles all three test implementations, puts test output in appropriate log files and plots the data with gnuplot. The result is displayed in Figure \ref{fig:hashcmp}.
 
-We hypothesize that several factors could contribute to our results: (1) our implementation is sub-optimal or (2) the STL framework doesn't play well with our implementation.
+\paragraph{The first implementation}
+
+Our first attempt showed our hash function implementation to run close to 30 times slower than \cpp STL! This was a huge surprise as we had expected at least something comparable. For a long time we struggled with trying to figure out where the bottleneck was. The underlying problem is obviously (to us) that none of us are experienced \cpp programmers and had to gather knowledge along the way.
 
 In light of the above mentioned factors we decided to abandon this comparison and focus on the sought speed gain, by ``wrapping'' the input before hashing (WPSH). Furthermore we took our hash function implementation out of the STL framework and implemented another testing framework in which the only gap to be filled is a hash function, given an input stream \funk{std::ifstream} and outputting a 32-bit integer.
+
+%Initially, we compared the PSH against the \cpp STL \funk{unordered\_set}, in which we discovered that PSH runs approximately 30 times slower compared to the STL hasher. The comparison was made using a driver framework similar in style to the code provided in the assignments (using Makefile tricks). This framework allowed us to focus only on the hash function and keeping the underlying framework unchanged. Ideally this should give a fairer basis of comparison for the hash functions. In order to accomodate STL, for each book the entire text was read into a string and then the string was stored in an \funk{unordered\_set} whose hash function had been fixed at compilation time (either \funk{std::hash<Key>} or our \funk{dshash::hash<Key>}. Reading a whole file into memory may not be a good idea, but for the conditions being equal across the tests it doesn't really matter how badly this aspect performs.
+
+%As mentioned we found our implementation to be quite a bit slower than \funk{std::hash}, consistently close to 30 times slower than that of STL. We believe this is due to our implementation being more elaborate, and possibly doing something unfortunate in terms of execution, possibly causing a lot of cache misses or flushes and not gaining any advantage. The actual hash function used in \funk{std::hash} has not been accessible to us (or we have simply not been successful at finding it), so directly inspecting its code to get an idea of why the differences are so large has not been possible.
+
+%Implementing the ``wrapping'' to reduce the size of the hashed string (and the number of multiplications) were done using the same setup, but yielded no improvements.
+
+%We hypothesize that several factors could contribute to our results: (1) our implementation is sub-optimal or (2) the STL framework doesn't play well with our implementation.
+
 
 
 
@@ -256,22 +267,33 @@ In light of the above mentioned factors we decided to abandon this comparison an
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width = \textwidth]{./DirectOnlineOffline.png}
+	\includegraphics[width = \textwidth]{./hashing/hashcmp.pdf}
 	\caption{Performance of our implementation}
-	\label{fig:directpoly}
+	\label{fig:hashcmp}
 \end{figure}
 
 Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka . %TODO: hvad er speedup?
 
-Since we also implemented our own version of Pair-multiply-shift, we also compare that to the standard library. 
+\paragraph{Gaining speed}
+
+Going back to the drawing board, we discovered several (minor) mistakes and two major ones that proved crucial to the speed of our implementation:
+\begin{inparaenum}[(1)]
+\item we hadn't implemented the speed-up using the recurrence described in the notes; and
+\item we had been reading 8 bits at a time from an input stream, concatenating eight of these into a 64-bit chunk, where one can just exchange \funk{char} with \funk{uint64\_t} to read 64 bits at a time.
+\end{inparaenum}
+These changes combined produced the results seen in Figure~\ref{fig:hashcmp}, suddenly yielding a significant speed-up compared to the STL implementation.
 
 \section{Conclusions and Future Work}
 
-One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which probably goes some way in explaining the inefficiency of our solution. For example, our method of reading in characters from a string stream only gives eight bits at a time where we would like to access the input 64 bits at a time. This is surely possible, but we never managed to find out how.
+One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which explains the inefficiency of our first solution. For example, our method of reading in characters from a string stream only gives eight bits at a time where we would like to access the input 64 bits at a time. The difference it makes appears to be substantial.
 
 It is also likely that we inadvertently cause a lot of cache misses and flushes, which could obviously increase running times somewhat.
 
-An optimization that could be considered for the implementation of (offline) WPSH, would be to inline the reduction logic in the hashing function, instead of gathering a list of 64-bit integers. Then the reduction could work directly on the input stream, avoiding unnecessary copying and branching.
+One optimisation we discussed, but decided to omit for the moment, is to inline the reduction step in the hashing function, so instead of copying 32 64-bit integers into an array and then process it we compute the reduction online, directly on the input stream. This would avoid unnecessary copyingi.
+
+Another optimization we attempted in our despair of a very slow algorithm was an offline version of the wrapped PSH, where the reductions would first be computed in its own phase, and a subsequent phase would then perform the multiplications. Experimentally we saw no real improvement, but this was before we discovered our own inefficiency mistakes.
+
+%An optimization that could be considered for the implementation of (offline) WPSH, would be to inline the reduction logic in the hashing function, instead of gathering a list of 64-bit integers. Then the reduction could work directly on the input stream, avoiding unnecessary copying and branching.
 
 %One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
 %once and let it return a 64-bit integer. This 
