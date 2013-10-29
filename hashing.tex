@@ -166,6 +166,10 @@ becomes a lot shorter---as discussed above. Secondly, the reduction computation
 can be done completely in simple (64-bit) integers, discarding overflow, so we
 simply iterate over a list of \funk{uint64\_t}s and implement the pseudo-code more or less verbatim.
 
+While reading the input, for every 32 integers of 64 bits, we call the function
+\funk{reduce}, which implements both $r_1$ and $r_2$, computing $y =
+r_1(X_i)r_2(X_i)$, and the term $a^i \cdot y$ is immediately computed and the (intermediate) result is updated.
+
 While reading the input, every time we have 32 $64$-bit integers, we call the function \funk{reduce}, which outputs $r(X_i)$. For every two such reductions, a new 64-bit number is formed, $y = r_2(X_{i+1})r_1(X_i)$ and the term $a^i \cdot y$ is immediately computed, and the (intermediate) result is updated.
 
 %TODO: Thomas?!
@@ -181,11 +185,11 @@ While reading the input, every time we have 32 $64$-bit integers, we call the fu
 
 \paragraph{Offline Version of Wrapped Polynomial String Hashing}
 
-Benchmarking indicated quite early after the the wrapped polynomial string hashing was implemented that it actually ran slower (or around the same speed) than the direct polynomial hashing. The comes as a bit of a surprise, although the actual hashing function has an added complexity to it. There is in the implementation a lot of state, for example a lot of switching on whether we are constructing $r_1(X_i)$ or $r_2(X_j)$, that is, the lower or upper half of the next 64-bit number.
+Benchmarking indicated quite early after the the wrapped polynomial string hashing was implemented that it actually ran slower (or around the same speed) than the direct polynomial hashing. The comes as a bit of a surprise, although the actual hashing function has an added complexity to it.
 
 We therefore considered splitting the functionality into two separate phases, one that constructs $r(X_0),\dots,r(X_j)$, stored in a list, and then postpone the actual (89-bit modulo $p$) multiplications.
 
-This ``offline'' version achieves a next to nothing in terms of speed-up.
+%%This ``offline'' version achieves a next to nothing in terms of speed-up.
 
 \section{Experiment}
 First, we examine the time-performance of the direct polynomial string hashing. We expect the number of iterations to grow linearly with the file size, and thus the time to grow linearly as well.
@@ -211,6 +215,14 @@ In light of the above mentioned factors we decided to abandon this comparison an
 
 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{./DirectOnlineOffline.png}
+	\caption{Performance of our implementation}
+	\label{fig:directpoly}
+\end{figure}
+
+
 (figure)
 
 Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka . %TODO: hvad er speedup?
@@ -219,4 +231,10 @@ Using the speedup, wrapped polynomial string hashing, we expect a time-improveme
 
 Since we also implemented our own version of Pair-multiply-shift, we also compare that to the standard library. 
 
+\section{Conclusions and Future Work}
+
+One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which probably goes some way in explaining the inefficiency of our solution. For example, the
+
+%One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
+%once and let it return a 64-bit integer. This 
 \end{document}
