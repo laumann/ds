@@ -52,10 +52,6 @@ int main(int argc, char *argv[]) {
 	}
 	in >> std::noskipws;
 
-	//in.seekg(0, in.end);
-	int length = 0; //in.tellg();
-	//in.seekg(0, in.beg);
-
 	std::clock_t start = std::clock();
 	uint32_t h = hashfoo(in);
 	std::clock_t stop = std::clock();

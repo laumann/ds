@@ -233,18 +233,14 @@ namespace dshash_wrapped {
 					xs[xsz++] = x;
 					nchar = 0;
 					if (xsz == 32) {
-						uint32_t *np = high ? &n.mid : &n.low;
-						*np = reduce(xs, 32, high ? 0 : 32);
-						if (high) {
-							multp(&ai, &a, &ai);
-							multp(&ai, &n, &prod);
-							add_to(&r, &prod);
-							if (!((++i & (1 << 6))) - 1)
-								modp(&r);
-							high = false;
-						} else {
-							high = true;
-						}
+						n.mid = reduce(xs, 32, 0);
+						n.low = reduce(xs, 32, 32);
+						
+						multp(&ai, &a, &ai);
+						multp(&ai, &n, &prod);
+						add_to(&r, &prod);	
+						if (!((++i & (1 << 6))) - 1)
+							modp(&r);
 						xsz = 0;
 					}
 				}
@@ -253,17 +249,12 @@ namespace dshash_wrapped {
 			 * Identify if we need to multiply a remaining chunk 
 			 */
 			if (xsz > 0) {
-				//std::cout << "What up?!?" << std::endl;
 				if (nchar < 8) {
 					xs[xsz++] = x;
 				}
+				n.mid = reduce(xs, xsz, 0);
+				n.low = reduce(xs, xsz, 32);
 
-				if (high) {
-					n.mid = reduce(xs, xsz, 32);
-				} else {
-					n.mid = 0;
-					n.low = reduce(xs, xsz, 0);
-				}
 				multp(&ai, &a, &ai);
 				multp(&ai, &n, &prod);
 				add_to(&r, &prod);
