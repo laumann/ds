@@ -233,7 +233,9 @@ Since we also implemented our own version of Pair-multiply-shift, we also compar
 
 \section{Conclusions and Future Work}
 
-One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which probably goes some way in explaining the inefficiency of our solution. For example, the
+One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which probably goes some way in explaining the inefficiency of our solution. For example, our method of reading in characters from a string stream only gives eight bits at a time where we would like to access the input 64 bits at a time. This is surely possible, but we never managed to find out how.
+
+It is also likely that we inadvertently cause a lot of cache misses and flushes, which could obviously increase running times somewhat.
 
 %One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
 %once and let it return a 64-bit integer. This 
