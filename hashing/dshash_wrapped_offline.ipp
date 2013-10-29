@@ -211,13 +211,11 @@ namespace dshash_wrapped_offline {
 			uint64_t xs[32];
 			uint64_t x = 0;
 			size_t xsz = 0;
-			bool high = false;
 
 			char c;
 			std::vector<struct number *> reduced;
 			int redn = 0;
 
-			//int i = 0;
 			int nchar = 0;
 			for (s >> c; s.good(); s >> c) {
 				if (nchar < 8) {
@@ -227,15 +225,11 @@ namespace dshash_wrapped_offline {
 					xs[xsz++] = x;
 					nchar = 0;
 					if (xsz == 32) {
-						if (high) {
-							reduced[redn++]->mid = reduce(xs, 32, 32);
-							high = false;
-						} else {
-							reduced.push_back((struct number *)malloc(sizeof(struct number)));
-							reduced[redn]->low = reduce(xs, 32, 0);
-							reduced[redn]->high = 0;
-							high = true;
-						}
+						reduced.push_back((struct number *)malloc(sizeof(struct number)));
+						reduced[redn]->high = 0;
+						reduced[redn]->mid = reduce(xs, 32, 0);
+						reduced[redn]->low = reduce(xs, 32, 32);
+						redn++;
 						xsz = 0;
 					}
 				}
@@ -249,22 +243,16 @@ namespace dshash_wrapped_offline {
 				}
 				reduced.push_back((struct number *)malloc(sizeof(struct number)));
 				reduced[redn]->high = 0;
-
-				if (high) {
-					reduced[redn]->mid = reduce(xs, xsz, 32);
-				} else {
-					reduced[redn]->mid = 0;
-					reduced[redn]->low = reduce(xs, xsz, 32);
-				}
+				reduced[redn]->mid = reduce(xs, xsz, 0);
+				reduced[redn]->low = reduce(xs, xsz, 32);
 			}
 			
-			struct number n = { 0, 0, 0 };
 			struct number ai = { 0, 0, 1 };
 			struct number r = { 0, 0, 1 };
 			struct number prod = { 0, 0, 0 };
 
 
-			for (int i = 0; i < reduced.size(); i++) {
+			for (unsigned i = 0; i < reduced.size(); i++) {
 				multp(&ai, &a, &ai);
 				multp(&ai, reduced[i], &prod);
 				add_to(&r, &prod);
