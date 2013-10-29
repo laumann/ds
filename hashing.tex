@@ -7,7 +7,7 @@
 \usepackage{amsthm}
 \usepackage{xspace}
 \usepackage{listings}
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{color}
 \usepackage{paralist}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -27,7 +27,7 @@
 \newcommand{\Oo}{\mathcal O} %big-O notation
 \newcommand{\oo}{\mathcal o} %small-O notation ;)
 
-\newcommand{\funk}[1]{\small\texttt{#1}}
+\newcommand{\funk}[1]{\texttt{\small #1}}
 \newcommand{\cpp}{C+\!+\xspace}
 
 \lstdefinestyle{C}{
@@ -37,9 +37,10 @@
 	language=C,
 	showstringspaces=false,
 	basicstyle=\footnotesize\ttfamily,
-	keywordstyle=\bfseries\color{green},
+	keywordstyle=\bfseries\color{PineGreen},
 	commentstyle=\footnotesize,%\itshape,%\color{purple!40!black},
 	identifierstyle=\bfseries,%\color{blue},
+	frame=single,
 	%stringstyle=\color{orange},
 }
 
@@ -76,20 +77,33 @@ Given a string $x=x_0 \ldots x_d$ with $x_i < u$, and a codomain $[m]$, let $p$ 
 
 Given that $d$ is no larger than $p/m$, the collision probability is at most $2/m$. Setting $p=2^{89}-1$ and $u=2^{64}$ and $m=2^{32}$, this means we are safe for strings of length up $2^{57}$, which is enough for our purposes.
 
-Our algorithm thus states roughly:
-
+We implement the alternative multiplication scheme outlined in \cite{thorupNotes} using a recurrence, sketched roughly in pseudo-code as:
 \begin{verbatim}
 a <- random number
 b <- random number
-ai = 1
-res = x[0]
-for(i = 1 to d){
-  ai = ai * a (mod p)
-  res = res + ai * x[i] (mod p)
+res = x_1
+for x_i <- x_2 to x_n {
+    res += x_i;
+    res = res*a (mod p)
 }
 res = res * b (mod p)
-res = res mod p
+res = res mod m
 \end{verbatim}
+
+%Our algorithm thus states roughly:
+%
+%\begin{verbatim}
+%a <- random number
+%b <- random number
+%ai = 1
+%res = x[0]
+%for(i = 1 to d){
+%  ai = ai * a (mod p)
+%  res = res + ai * x[i] (mod p)
+%}
+%res = res * b (mod p)
+%res = res mod p
+%\end{verbatim}
 
 As earlier noted, we can use the congruence $x \equiv x\mod 2^q + \lfloor x / 2^q \rfloor$, to make quicker calculations modulo a Mersenne prime, $2^q -1$.
 
@@ -122,7 +136,7 @@ Where $a_i,b_i,\alpha_i,\beta_i$ are random $\bar{w}$-bit integers, and where $n
 
 Setting $l = 32$ and having $d\leq 32$, we can use $\bar{w} = 64$, and let $x_i,a_i,b$ be $64$-bit integers. Since we discard everything above $\bar{w}$, that simply means we perform carriless multiplication and addition, since it corresponds to operating within $\mathbb{Z}/2^{64}$. With these values of $\bar{w}$ and $l$, the result will be a $32$-bit integer. Concatenating two universal $32$-bit integer functions yields a universal $64$-bit integer function, that is, $r: [2^{64}]^d \to [2^{64}]$.
 
-\paragraph{Comparison to direct polynomial string hashing.} Theoretically, the improvement is substantial. The number of multiplications per $32\cdot 64$-bit chunk is now $16$, for the pair-mult-shift, plus $9+6=15$, for one iteration of polynomial string hashing. A total of $31$ multiplications (of $64$-bit numbers). With direct PSH, the number of multiplications would be $15\cdot 32 = 480$. That is a factor of $15$ improvement in the number of multiplications.
+\paragraph{Comparison to direct polynomial string hashing.} Theoretically, the improvement is substantial. The number of multiplications per $32\cdot 64$-bit chunk is now $16$, for the pair-mult-shift, plus $9$, for one iteration of polynomial string hashing. A total of $25$ multiplications (of $64$-bit numbers). With direct PSH, the number of multiplications would be $9\cdot 25 = 288$. That is a factor of $10$ improvement in the number of multiplications.
 
 \section{Implementation}
 
@@ -150,20 +164,6 @@ Doing modulo $m$ when $m = 32$ simply implies returning \funk{n.low}
 
 The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed. The implementation is an ``online'' version that updates the current result when a new $x_i$ has been found.
 
-We implement the alternative multiplication scheme outlined in [MIKKEL'S NOTES] using a recurrence, sketched roughly in pseudo-code as:	
-
-\begin{verbatim}
-a <- random number
-b <- random number
-res = 0
-for (x_i in x){
-    res += x_i;
-    res = res*a (mod p)
-}
-res = res * b (mod p)
-res = res mod m
-\end{verbatim}
-
 \paragraph{Pair-multiply-shift} 
 
 We generate the random integers we need by calling \texttt{random.org}. 
@@ -176,7 +176,7 @@ for(i = 0; i<66; i++){
 }
 \end{verbatim}
 
-The randoms $0\ldots 31$ correspond to $a_i$, then randoms no. $32$ is our b, and in the same way the last ones are $\alpha_i$ and $\beta$.
+The randoms $0\ldots 31$ correspond to $a_i$, then randoms no. $32$ is our $b$, and in the same way the last ones are $\alpha_i$ and $\beta$.
 
 To compute the hash-value, we do the following:
 \begin{verbatim}
@@ -267,7 +267,7 @@ In light of the above mentioned factors we decided to abandon this comparison an
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width = \textwidth]{./hashing/hashcmp.pdf}
+	\includegraphics[width = \textwidth]{./DirectOnlineSTL.pdf}
 	\caption{Performance of our implementation}
 	\label{fig:hashcmp}
 \end{figure}
@@ -285,27 +285,37 @@ These changes combined produced the results seen in Figure~\ref{fig:hashcmp}, su
 
 \section{Conclusions and Future Work}
 
-One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which explains the inefficiency of our first solution. For example, our method of reading in characters from a string stream only gives eight bits at a time where we would like to access the input 64 bits at a time. The difference it makes appears to be substantial.
+One of the immediate problems present throughout this project, is the fact that neither of us are experienced \cpp programmers, which explains the inefficiency of our first solution. For example, our method of reading in characters from a string stream only gives eight bits at a time where we would like to access the input 64 bits at a time. The difference it makes appears is substantial.
 
 It is also likely that we inadvertently cause a lot of cache misses and flushes, which could obviously increase running times somewhat.
 
-One optimisation we discussed, but decided to omit for the moment, is to inline the reduction step in the hashing function, so instead of copying 32 64-bit integers into an array and then process it we compute the reduction online, directly on the input stream. This would avoid unnecessary copyingi.
+One optimisation we discussed, but decided to omit for the moment, is to inline the reduction step in the hashing function, so instead of copying 32 64-bit integers into an array and then process it we compute the reduction online, directly on the input stream. This would avoid unnecessary copying.
 
 Another optimization we attempted in our despair of a very slow algorithm was an offline version of the wrapped PSH, where the reductions would first be computed in its own phase, and a subsequent phase would then perform the multiplications. Experimentally we saw no real improvement, but this was before we discovered our own inefficiency mistakes.
 
 %An optimization that could be considered for the implementation of (offline) WPSH, would be to inline the reduction logic in the hashing function, instead of gathering a list of 64-bit integers. Then the reduction could work directly on the input stream, avoiding unnecessary copying and branching.
 
 %One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
-%once and let it return a 64-bit integer. This 
+%xonce and let it return a 64-bit integer. This 
 
-\section{Appendix}
+\begin{thebibliography}{2}
+\bibitem{thorupNotes}
+Mikkel Thorup,\emph{Implementing Basic Hashing: Lecture Notes}, 2013.
+\end{thebibliography}
+
+\section*{Appendix}
+
 \lstlistoflistings
 \newpage
 \includecode{hashing/hotbox.cpp}
-\newpage
 \includecode{hashing/std.ipp}
+\newpage
 \includecode{hashing/dshash.ipp}
-%%\includecode{hashing/dshash_wrapped.ipp}
+\newpage
+\lstinputlisting[caption=hashing/dshash\_wrapped.ipp, escapechar=, style=C]{hashing/dshash_wrapped.ipp}
+\newpage
+This file was generated by the script \funk{hashing/make-random-uint64.sh}
+\includecode{hashing/random-numbers-uint64.hpp}
 
 
 

@@ -1,9 +1,6 @@
-#include <algorithm>  // std::random_shuffle
-//#undef NDEBUG
 #include <cassert>
 #include <ctime>
 #include <cerrno>
-#include <functional> // std::less
 #include <iostream>
 #include <vector> // std::vector
 #include <fstream>
@@ -12,7 +9,7 @@
 
 #include <unordered_set>
 
-#include "hash.ipp" // Hash and Key should be defined here
+#include "hash.ipp" // 'Hash' and 'Key' should be defined here
 
 #include <string>
 #include <iterator>
@@ -67,7 +64,6 @@ int main(int argc, char** argv) {
 	std::clock_t start, stop;
 	std::vector<double> time_sums(input.size(), 0);
 	
-	//C<T> *set;
 	std::unordered_set<Key, Hash> *set;
 
 	for (int i=0; i < repetitions; i++) {
