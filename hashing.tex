@@ -237,6 +237,8 @@ One of the immediate problems present throughout this project, is the fact that 
 
 It is also likely that we inadvertently cause a lot of cache misses and flushes, which could obviously increase running times somewhat.
 
+An optimization that could be considered for the implementation of (offline) WPSH, would be to inline the reduction logic in the hashing function, instead of gathering a list of 64-bit integers. Then the reduction could work directly on the input stream, avoiding unnecessary copying and branching.
+
 %One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
 %once and let it return a 64-bit integer. This 
 \end{document}
