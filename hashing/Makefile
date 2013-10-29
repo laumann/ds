@@ -1,3 +1,21 @@
+# Defines various targets for different benchmarking exercises.
+#
+# The files ending in [FILE].ipp have the targets have corresponding targets
+#
+# 	- [FILE].compile; and
+# 	- [FILE].hash
+# 
+# the latter target running benchmarking using N iterations. The binaries
+# produced are simply called [FILE].
+#
+# The files named [FILE}.h2pp are the second attempt at benchmarking the WPSH
+# against the direct PSH. They have the following targets available:
+#
+# 	- [FILE].comp
+#
+# producing binaries named [FILE].comp. There are no test targets for these
+# (these were run manually). 
+
 CXX=g++
 CXXFLAGS= -Wall -DNDEBUG -O3 -std=c++11
 
