@@ -7,6 +7,8 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{xspace}
+\usepackage{listings}
+\usepackage{color}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{algorithm}[theorem]{Algorithm} %{\bfseries}{\itshape}
@@ -28,6 +30,25 @@
 \newcommand{\funk}[1]{\small\texttt{#1}}
 \newcommand{\cpp}{C+\!+\xspace}
 
+\lstdefinestyle{C}{
+	belowcaptionskip=1\baselineskip,
+	breaklines=true,
+	xleftmargin=\parindent,
+	language=C,
+	showstringspaces=false,
+	basicstyle=\footnotesize\ttfamily,
+	keywordstyle=\bfseries\color{green},
+	commentstyle=\footnotesize,%\itshape,%\color{purple!40!black},
+	identifierstyle=\bfseries,%\color{blue},
+	%stringstyle=\color{orange},
+}
+
+
+\lstset{escapechar=@,style=C}
+
+\newcommand{\includecode}[2][C]{\lstinputlisting[caption=#2, escapechar=, style=#1]{#2}}
+
+
 \title{Hashing for variable length strings}
 \author{Thomas Laumann Jespersen \and Eva Rotenberg}
 
@@ -36,9 +57,12 @@
 
 We use polynomial string hashing to obtain universal hashing of strings of variable length.
 
-For fixed length strings, some very fast hashing functions exist, but for variable length strings, so far no version of "multiply shift" has been developed. 
+For fixed length strings, some very fast hashing functions exist, but for variable length strings, so far no version of ``multiply shift'' has been developed. 
 
-However, one can divide the string into chunks of fixed length, use a very fast hashing function on each chunk, and apply the universal hashing function on the result, which again has variable length. We call this "wrapped polynomial string hashing" as opposed to "direct polynomial string hashing".
+However, one can divide the string into chunks of fixed length, use a very fast hashing function on each chunk, and apply the universal hashing function on the result, which again has variable length. We call this ``wrapped polynomial string hashing'' as opposed to ``direct polynomial string hashing''. Theoretically, the wrapped polynomial string hashing should perform much better than its direct counterpart. 
+
+Experimentally we compare the standard \cpp STL hash function employed in \funk{unordered\_set} to both the direct and wrapped polynomial string hashing. Our results indicate that our implementation works fast for large strings. We did not, however, find any significant difference between the direct and wrapped versions of our hashing functions.
+
 
 The obtained result is a fast \emph{universal hash-function} for strings of unbounded length. %, which performs better in practice than the standard library implementation. 
 %TODO: Bedre end std lib?
@@ -110,9 +134,9 @@ The basic representation we employed for a 89-bit number is simply a \funk{struc
 
 \begin{verbatim}
 struct number {
-        uint32_t high;
-        uint32_t mid;
-        uint32_t low;
+    uint32_t high;
+    uint32_t mid;
+    uint32_t low;
 };
 \end{verbatim}
 
@@ -125,6 +149,21 @@ Doing modulo $m$ when $m = 32$ simply implies returning \funk{n.low}
 \paragraph{Direct Polynomial String Hashing}
 
 The direct hashing method goes over an input stream of arbitrary length and lumps every eight characters into one 64-bit value (the size of our input universe). This value is then used as $x_i$, and the term $x_i\cdot a^i$ is computed. The implementation is an ``online'' version that updates the current result when a new $x_i$ has been found.
+
+We implement the alternative multiplication scheme outlined in [MIKKEL'S NOTES] using a recurrence, sketched roughly in pseudo-code as:	
+
+\begin{verbatim}
+a <- random number
+b <- random number
+res = 0
+for (x_i in x){
+    res += x_i;
+    res = res*a (mod p)
+}
+res = res * b (mod p)
+res = res mod m
+\end{verbatim}
+
 \paragraph{Pair-multiply-shift} 
 
 We generate the random integers we need by calling \texttt{random.org}. 
@@ -217,17 +256,12 @@ In light of the above mentioned factors we decided to abandon this comparison an
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width = 0.7\textwidth]{./DirectOnlineOffline.png}
+	\includegraphics[width = \textwidth]{./DirectOnlineOffline.png}
 	\caption{Performance of our implementation}
 	\label{fig:directpoly}
 \end{figure}
 
-
-(figure)
-
 Using the speedup, wrapped polynomial string hashing, we expect a time-improvement compared to the direct string hashing. We use the same example files as above, and obtain a speed-up of cirka . %TODO: hvad er speedup?
-
-(figure)
 
 Since we also implemented our own version of Pair-multiply-shift, we also compare that to the standard library. 
 
@@ -241,4 +275,16 @@ An optimization that could be considered for the implementation of (offline) WPS
 
 %One direct optimisation in the wrapped PSH would be to only call \funk{reduce}
 %once and let it return a 64-bit integer. This 
+
+\section{Appendix}
+\lstlistoflistings
+\newpage
+\includecode{hashing/hotbox.cpp}
+\newpage
+\includecode{hashing/std.ipp}
+\includecode{hashing/dshash.ipp}
+%%\includecode{hashing/dshash_wrapped.ipp}
+
+
+
 \end{document}

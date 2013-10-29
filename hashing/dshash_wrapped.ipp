@@ -224,8 +224,6 @@ namespace dshash_wrapped {
 					multp(&r, &a, &r);
 					xsz = 0;
 				}
-		
-		
 			}
 			if (xsz > 0) {
 				x.mid = reduce(xs, xsz, 0);
@@ -233,67 +231,6 @@ namespace dshash_wrapped {
 			}
 			multp(&r, &b, &r);
 			return r.low;
-
-			/**
-			 * Algo:
-			 *  - process the stream 8 bits at a time, gather 64 bit numbers
-			 *  - when full, call reduce(xs)
-			 *  - if 'high' then we have a new number we can multiply by
-			 */
-			/*
-			uint64_t xs[32];
-			uint64_t x = 0;
-			size_t xsz = 0;
-			bool high = false;
-
-			char c;
-			struct number n = { 0, 0, 0 };
-			struct number ai = { 0, 0, 1 };
-			struct number r = { 0, 0, 1 };
-			struct number prod = { 0, 0, 0 };
-
-			int i = 0;
-			int nchar = 0;
-			for (s >> c; s.good(); s >> c) {
-				if (nchar < 8) {
-					x |= (low8_64(c) << (nchar++ << 3));
-				} else {
-					// gathered 64 bits
-					xs[xsz++] = x;
-					nchar = 0;
-					if (xsz == 32) {
-						n.mid = reduce(xs, 32, 0);
-						n.low = reduce(xs, 32, 32);
-						
-						multp(&ai, &a, &ai);
-						multp(&ai, &n, &prod);
-						add_to(&r, &prod);	
-						if (!((++i & (1 << 6))) - 1)
-							modp(&r);
-						xsz = 0;
-					}
-				}
-			}
-			*/
-			/**
-			 * Identify if we need to multiply a remaining chunk 
-			 */
-			/*
-			if (xsz > 0) {
-				if (nchar < 8) {
-					xs[xsz++] = x;
-				}
-				n.mid = reduce(xs, xsz, 0);
-				n.low = reduce(xs, xsz, 32);
-
-				multp(&ai, &a, &ai);
-				multp(&ai, &n, &prod);
-				add_to(&r, &prod);
-				modp(&r);
-			}
-			multp(&r, &b, &r);
-			return r.low;
-			*/
 		}
 	};
 }

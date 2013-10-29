@@ -99,15 +99,21 @@ uint32_t hashfoo(std::ifstream& s) {
 	uint64_t x = 0;
 	size_t xsz = 0;
 
-	char c;
-	struct number n = { 0, 0, 0 };
-	struct number ai = { 0, 0, 1 };
+	uint64_t c;
+	struct number x = { 0, 0, 0 };
+	//struct number ai = { 0, 0, 1 };
 	struct number r = { 0, 0, 1 };
-	struct number prod = { 0, 0, 0 };
+	//struct number prod = { 0, 0, 0 };
 
-	int i = 0;
-	int nchar = 0;
+	//int i = 0;
+	//int nchar = 0;
 	for (s >> c; s.good(); s >> c) {
+		xs[xsz++] = c;
+		if (xsz == 32) {
+			x.mid = reduce(xs, 32, 0);
+			x.low = reduce(xs, 32, 32);
+
+		}
 		if (nchar < 8) {
 			x |= (low8_64(c) << (nchar++ << 3));
 		} else {
@@ -117,13 +123,12 @@ uint32_t hashfoo(std::ifstream& s) {
 			if (xsz == 32) {
 				n.mid = reduce(xs, 32, 0);
 				n.low = reduce(xs, 32, 32);
+				
+				add_to(&r, &x);
+				multp(&r, &a, &r);
 			
-				multp(&ai, &a, &ai);
-				multp(&ai, &n, &prod);
-				add_to(&r, &prod);	
-				if (!((++i & (1 << 6))) - 1)
-					modp(&r);
 				xsz = 0;
+
 			}
 		}
 	}
@@ -131,6 +136,7 @@ uint32_t hashfoo(std::ifstream& s) {
 	 * Identify if we need to multiply a remaining chunk 
 	 */
 	if (xsz > 0) {
+		
 		if (nchar < 8) {
 			xs[xsz++] = x;
 		}
