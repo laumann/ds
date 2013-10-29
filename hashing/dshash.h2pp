@@ -1,33 +1,18 @@
 
 uint32_t hashfoo(std::ifstream& s) {
-	char c;
-	struct number n = { 0, 0, 0 };
-	struct number ai = { 0, 0, 1 };
-	struct number r = { 0, 0, 1 };
-	struct number prod = { 0, 0, 0 };
-	int i = 0;
-	int nchar = 0;
-	for (s >> c; s.good(); s >> c) {
-		if (nchar < 4)
-			n.low |= (low8(c)) << (nchar << 3);
-		else
-			n.mid |= (low8(c)) << ((nchar - 4) << 3);
-			
-		if (nchar == 8) {
-			multp(&ai, &a, &ai);
-			multp(&ai, &n, &prod);
-			add_to(&r, &prod);
+	uint64_t c;
+	struct number x = { 0, 0, 0 };
 
-			if (!((++i & (1 << 6)) - 1))
-				modp(&r);
-			nchar = n.high = n.mid = n.low = 0;
-		}
-	}
-	if (nchar > 0) {
-		multp(&ai, &a, &ai);
-		multp(&ai, &n, &prod);
-		add_to(&r, &prod);
-		modp(&r);
+	s >> c;
+	struct number r = { 0, high(c), low(c) };
+
+	for (s >> c; s.good(); s >> c) {
+		x.low = low(c);
+		x.mid = high(c);
+		
+		add_to(&r, &x);
+		multp(&r, &a, &r);
+		
 	}
 	multp(&r, &b, &r);
 	return r.low;
