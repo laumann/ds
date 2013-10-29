@@ -182,7 +182,24 @@ namespace dshash {
 			std::istringstream s(key);
 
 			s >> std::noskipws;
+			uint64_t c;
+			struct number x = { 0, 0, 0 };
 
+			s >> c;
+			struct number r = { 0, high(c), low(c) };
+
+			for (s >> c; s.good(); s >> c) {
+				x.low = low(c);
+				x.mid = high(c);
+		
+				add_to(&r, &x);
+				multp(&r, &a, &r);
+		
+			}
+			multp(&r, &b, &r);
+			return r.low;
+
+			/*
 			char c;
 			struct number n = { 0, 0, 0 };
 			struct number ai = { 0, 0, 1 };
@@ -216,6 +233,7 @@ namespace dshash {
 			}
 			multp(&r, &b, &r);
 			return r.low;
+			*/
 		}
 	};
 }

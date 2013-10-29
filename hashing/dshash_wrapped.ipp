@@ -205,6 +205,34 @@ namespace dshash_wrapped {
 			std::istringstream s(key);
 
 			s >> std::noskipws;
+			
+			uint64_t c;
+			struct number x = { 0, 0, 0 };
+
+			s >> c;
+			struct number r = { 0, high(c), low(c) };
+			
+			uint64_t xs[32];
+			size_t xsz = 0;
+
+			for (s >> c; s.good(); s >> c) {
+				xs[xsz++] = c;
+				if (xsz == 32) {
+					x.mid = reduce(xs, 32, 0);
+					x.low = reduce(xs, 32, 32);
+					add_to(&r, &x);
+					multp(&r, &a, &r);
+					xsz = 0;
+				}
+		
+		
+			}
+			if (xsz > 0) {
+				x.mid = reduce(xs, xsz, 0);
+				x.low = reduce(xs, xsz, 32);
+			}
+			multp(&r, &b, &r);
+			return r.low;
 
 			/**
 			 * Algo:
@@ -212,6 +240,7 @@ namespace dshash_wrapped {
 			 *  - when full, call reduce(xs)
 			 *  - if 'high' then we have a new number we can multiply by
 			 */
+			/*
 			uint64_t xs[32];
 			uint64_t x = 0;
 			size_t xsz = 0;
@@ -245,9 +274,11 @@ namespace dshash_wrapped {
 					}
 				}
 			}
+			*/
 			/**
 			 * Identify if we need to multiply a remaining chunk 
 			 */
+			/*
 			if (xsz > 0) {
 				if (nchar < 8) {
 					xs[xsz++] = x;
@@ -262,6 +293,7 @@ namespace dshash_wrapped {
 			}
 			multp(&r, &b, &r);
 			return r.low;
+			*/
 		}
 	};
 }

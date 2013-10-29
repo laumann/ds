@@ -46,7 +46,7 @@ dshash: $(OBJS) $(HDRS)
 dshash_test: $(TEST_OBJS)
 	$(CXX) $(CXXFLAGS) $(TEST_OBJS) -o $@
 
-$(hash2comp): %.comp : %.h2pp
+$(hash2comp): %.comp : %.h2pp main2.cpp
 	@cp $*.h2pp hash.h2pp
 	$(CXX) $(CXXFLAGS) main2.cpp dshash.cpp -o $@
 
